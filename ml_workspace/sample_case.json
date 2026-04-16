@@ -1,0 +1,24 @@
+{
+  "age": 32,
+  "abuseType": "Mixed abuse",
+  "frequency": "frequent",
+  "threatLevel": "high",
+  "incidentDescription": "The survivor reports threats, money control, and being followed after work.",
+  "statement": "He keeps threatening me, controls my phone and money, and follows me outside the office.",
+  "historySummary": "Two prior complaints were noted by the NGO case worker.",
+  "priorComplaintsCount": 2,
+  "timelineEvents": [
+    {
+      "date": "2026-02-10",
+      "title": "Prior complaint",
+      "details": "The survivor previously reported threats and economic restriction.",
+      "source": "Case worker note"
+    },
+    {
+      "date": "2026-04-05",
+      "title": "Recent stalking concern",
+      "details": "The respondent was seen waiting outside the survivor's workplace.",
+      "source": "Victim statement"
+    }
+  ]
+}

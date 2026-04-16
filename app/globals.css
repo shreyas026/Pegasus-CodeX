@@ -1,0 +1,178 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #ede9df;
+  --bg-deep: #d8cfbf;
+  --panel: rgba(255, 252, 245, 0.88);
+  --panel-strong: #fffdf8;
+  --panel-subtle: rgba(247, 243, 235, 0.72);
+  --border: rgba(74, 60, 41, 0.15);
+  --border-strong: rgba(74, 60, 41, 0.28);
+  --text: #161616;
+  --muted: #5d554c;
+  --accent: #7b5b2d;
+  --accent-strong: #302117;
+  --accent-soft: #c7a976;
+  --low: #275d49;
+  --medium: #8a5b13;
+  --high: #8a2f2f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(123, 91, 45, 0.18), transparent 34%),
+    radial-gradient(circle at top right, rgba(48, 33, 23, 0.12), transparent 26%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.65), transparent 40%),
+    linear-gradient(180deg, #f6f1e7 0%, var(--bg) 54%, var(--bg-deep) 100%);
+  color: var(--text);
+  font-family: "Aptos", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(74, 60, 41, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 60, 41, 0.045) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent 90%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+p,
+li,
+span,
+dd,
+dt,
+label,
+input,
+select,
+textarea,
+button {
+  letter-spacing: -0.01em;
+}
+
+input,
+select,
+textarea {
+  @apply w-full rounded-xl border px-4 py-3 text-sm outline-none transition duration-200;
+  border-color: var(--border-strong);
+  background-color: rgba(255, 252, 246, 0.9);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  @apply ring-2;
+  border-color: var(--accent);
+  --tw-ring-color: rgb(123 91 45 / 0.18);
+  background-color: #fffdf8;
+}
+
+label {
+  @apply mb-2 block text-[0.72rem] font-semibold uppercase tracking-[0.18em];
+  color: var(--muted);
+}
+
+button {
+  transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+.page-fade {
+  animation: pageFade 420ms ease-out;
+}
+
+.display-kicker {
+  color: var(--accent);
+}
+
+.editorial-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(123, 91, 45, 0.4) 20%, transparent 100%);
+}
+
+.surface-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  box-shadow:
+    0 18px 45px rgba(26, 20, 15, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(18px);
+}
+
+.status-pill {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em];
+  background: rgba(255, 249, 239, 0.78);
+  color: var(--accent-strong);
+  border: 1px solid rgba(123, 91, 45, 0.2);
+}
+
+@keyframes pageFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+
+  body::before {
+    display: none;
+  }
+
+  aside,
+  button,
+  a[href="/brief"] {
+    display: none !important;
+  }
+
+  main {
+    padding: 0;
+  }
+
+  .surface-panel,
+  .print-brief,
+  section,
+  article {
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .print-brief {
+    color: black;
+  }
+}
