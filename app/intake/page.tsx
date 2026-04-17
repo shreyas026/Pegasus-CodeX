@@ -16,6 +16,7 @@ export default function IntakePage() {
   const { formData, updateFormData, setCaseId, setAnalysis, setDocuments } = useCaseStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const emergencyContactsValue = formData.emergencyContacts.join("\n");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -60,6 +61,33 @@ export default function IntakePage() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  function handleEmergencyContacts(value: string) {
+    const contacts = value
+      .split(/\n|,/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+    updateFormData({ emergencyContacts: contacts });
+  }
+
+  function handleUseLocation() {
+    setLocationError(null);
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported in this browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        updateFormData({
+          locationLat: Number(position.coords.latitude.toFixed(6)),
+          locationLng: Number(position.coords.longitude.toFixed(6))
+        });
+      },
+      () => {
+        setLocationError("Location permission was denied. You can still enter the area name manually.");
+      }
+    );
   }
 
   return (
@@ -248,68 +276,83 @@ export default function IntakePage() {
             />
           </div>
 
-          <div>
-            <label htmlFor="location-label">Location / area label</label>
-            <input
-              id="location-label"
-              value={formData.locationLabel}
-              onChange={(event) => updateFormData({ locationLabel: event.target.value })}
-              placeholder="Example: Bengaluru East"
-            />
-          </div>
+          <div className="md:col-span-2 grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
+            <div className="rounded-[24px] border border-[rgba(123,91,45,0.14)] bg-[rgba(255,255,255,0.56)] p-4">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                Location Context
+              </p>
+              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                Add a locality label so the heatmap and emergency alerts can surface high-risk areas.
+              </p>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <label htmlFor="location-label">Area / locality label</label>
+                  <input
+                    id="location-label"
+                    value={formData.locationLabel}
+                    onChange={(event) => updateFormData({ locationLabel: event.target.value })}
+                    placeholder="Example: Bengaluru East, Sector 12, Ward 8"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="location-lat">Latitude (optional)</label>
+                  <input
+                    id="location-lat"
+                    type="number"
+                    value={formData.locationLat ?? ""}
+                    onChange={(event) =>
+                      updateFormData({ locationLat: event.target.value ? Number(event.target.value) : null })
+                    }
+                    placeholder="12.9716"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="location-lng">Longitude (optional)</label>
+                  <input
+                    id="location-lng"
+                    type="number"
+                    value={formData.locationLng ?? ""}
+                    onChange={(event) =>
+                      updateFormData({ locationLng: event.target.value ? Number(event.target.value) : null })
+                    }
+                    placeholder="77.5946"
+                  />
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={handleUseLocation}
+                className="mt-3 inline-flex items-center gap-2 rounded-full border border-[rgba(123,91,45,0.18)] bg-[rgba(255,255,255,0.72)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent-strong)] transition hover:bg-white"
+              >
+                Use current location
+              </button>
+              {locationError ? (
+                <p className="mt-2 text-xs text-red-600">{locationError}</p>
+              ) : null}
+            </div>
 
-          <div>
-            <label htmlFor="location-lat">Latitude</label>
-            <input
-              id="location-lat"
-              type="number"
-              step="any"
-              value={formData.locationLat ?? ""}
-              onChange={(event) =>
-                updateFormData({
-                  locationLat: event.target.value === "" ? null : Number(event.target.value)
-                })
-              }
-              placeholder="12.9716"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="location-lng">Longitude</label>
-            <input
-              id="location-lng"
-              type="number"
-              step="any"
-              value={formData.locationLng ?? ""}
-              onChange={(event) =>
-                updateFormData({
-                  locationLng: event.target.value === "" ? null : Number(event.target.value)
-                })
-              }
-              placeholder="77.5946"
-            />
+            <div className="rounded-[24px] border border-[rgba(123,91,45,0.14)] bg-[rgba(255,255,255,0.56)] p-4">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                Emergency Contacts
+              </p>
+              <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+                List trusted contacts or NGO hotlines that should receive SOS alerts.
+              </p>
+              <label htmlFor="emergency-contacts" className="mt-3 block">
+                Contacts (comma or new line separated)
+              </label>
+              <textarea
+                id="emergency-contacts"
+                rows={4}
+                value={emergencyContactsValue}
+                onChange={(event) => handleEmergencyContacts(event.target.value)}
+                placeholder="NGO Hotline\nSister: +91-9000000001"
+              />
+            </div>
           </div>
 
           <div className="md:col-span-2">
-            <label htmlFor="emergency-contacts">Emergency contacts</label>
-            <textarea
-              id="emergency-contacts"
-              rows={4}
-              value={emergencyContactsValue}
-              onChange={(event) =>
-                updateFormData({
-                  emergencyContacts: event.target.value
-                    .split(/\r?\n/)
-                    .map((contact) => contact.trim())
-                    .filter(Boolean)
-                })
-              }
-              placeholder={"One contact per line.\nExample: NGO hotline\nPolice control room\nTrusted sibling"}
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label>Timeline / history viewer input</label>
+            <label>Timeline events</label>
             <TimelineEditor
               events={formData.timelineEvents}
               onChange={(timelineEvents) => updateFormData({ timelineEvents })}

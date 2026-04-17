@@ -6,7 +6,7 @@ import { CursorRotor } from "@/components/cursor-rotor";
 
 export const metadata: Metadata = {
   title: "Domestic Violence Case Analyzer",
-  description: "Legal-tech frontend prototype for case intake and risk analysis"
+  description: "Privacy-first domestic violence case analysis platform for intake, risk review, and legal preparation"
 };
 
 export default function RootLayout({

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -8,6 +9,28 @@ from typing import Any
 ROOT_DIR = Path(__file__).resolve().parents[2]
 ML_SRC_DIR = ROOT_DIR / "ml_workspace" / "src"
 ML_ARTIFACTS_DIR = ROOT_DIR / "ml_workspace" / "artifacts"
+
+
+def _required_artifacts() -> list[Path]:
+    return [
+        ML_ARTIFACTS_DIR / "severity_model.joblib",
+        ML_ARTIFACTS_DIR / "escalation_model.joblib",
+        ML_ARTIFACTS_DIR / "pattern_model.joblib",
+        ML_ARTIFACTS_DIR / "pattern_binarizer.joblib",
+    ]
+
+
+def get_analysis_strategy() -> str:
+    strategy = os.getenv("DV_ANALYSIS_STRATEGY", "ai-only").strip().lower()
+    if strategy not in {"ai-only", "hybrid", "rules-only"}:
+        return "ai-only"
+    return strategy
+
+
+def is_ml_ready() -> bool:
+    if not ML_ARTIFACTS_DIR.exists():
+        return False
+    return all(path.exists() for path in _required_artifacts())
 
 
 def _build_case_payload(case_data: dict[str, Any]) -> dict[str, Any]:
@@ -24,17 +47,12 @@ def _build_case_payload(case_data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def get_ml_prediction(case_data: dict[str, Any]) -> dict[str, Any] | None:
-    if not ML_ARTIFACTS_DIR.exists():
-        return None
-
-    required_artifacts = [
-        ML_ARTIFACTS_DIR / "severity_model.joblib",
-        ML_ARTIFACTS_DIR / "escalation_model.joblib",
-        ML_ARTIFACTS_DIR / "pattern_model.joblib",
-        ML_ARTIFACTS_DIR / "pattern_binarizer.joblib",
-    ]
-    if not all(path.exists() for path in required_artifacts):
+def get_ml_prediction(case_data: dict[str, Any], *, require_model: bool = False) -> dict[str, Any] | None:
+    if not is_ml_ready():
+        if require_model:
+            raise RuntimeError(
+                "AI model artifacts are not available. Train the model first in ml_workspace/artifacts before analyzing cases."
+            )
         return None
 
     if str(ML_SRC_DIR) not in sys.path:
@@ -47,5 +65,9 @@ def get_ml_prediction(case_data: dict[str, Any]) -> dict[str, Any] | None:
             _build_case_payload(case_data),
             artifacts_dir=ML_ARTIFACTS_DIR,
         )
-    except Exception:
+    except Exception as exc:
+        if require_model:
+            raise RuntimeError(
+                "AI model artifacts were found, but inference could not be loaded. Retrain the model and restart the backend."
+            ) from exc
         return None

@@ -4,7 +4,7 @@ import re
 
 from logic.brief import generate_legal_case_brief
 from logic.legal_references import build_legal_reference_suggestions
-from logic.ml_bridge import get_ml_prediction
+from logic.ml_bridge import get_analysis_strategy, get_ml_prediction
 from logic.redaction import redact_sensitive_text
 from logic.timeline import summarize_timeline
 from models import AnalysisResult, CaseRecord, ModelInsight, SafeActionNavigator, TimelineEvent
@@ -387,7 +387,11 @@ def analyze_case(case: CaseRecord) -> AnalysisResult:
         location_label=case.locationLabel,
     )
 
-    ml_prediction = get_ml_prediction(
+    analysis_strategy = get_analysis_strategy()
+    require_model = analysis_strategy == "ai-only"
+    ml_prediction = None
+    if analysis_strategy != "rules-only":
+        ml_prediction = get_ml_prediction(
         {
             "age": case.age,
             "abuseType": case.abuseType,
@@ -398,25 +402,24 @@ def analyze_case(case: CaseRecord) -> AnalysisResult:
             "historySummary": anonymized_history_summary,
             "priorComplaintsCount": case.priorComplaintsCount,
             "timelineEvents": [event.model_dump() for event in anonymized_timeline],
-        }
+        },
+        require_model=require_model,
     )
 
     analysis_mode = "rule-based"
     model_insight = None
     if ml_prediction:
-        analysis_mode = "hybrid-ml"
+        analysis_mode = "ai-ml" if analysis_strategy == "ai-only" else "hybrid-ml"
         severity = str(ml_prediction.get("severity", severity))
         escalation_level = str(ml_prediction.get("escalationLevel", escalation_level))
-        risk_score = round((risk_score + int(ml_prediction.get("riskScore", risk_score))) / 2)
-        escalation_score = round(
-            (escalation_score + int(ml_prediction.get("escalationScore", escalation_score))) / 2
-        )
+        risk_score = int(ml_prediction.get("riskScore", risk_score))
+        escalation_score = int(ml_prediction.get("escalationScore", escalation_score))
         ml_patterns = [
             str(pattern).strip().lower()
             for pattern in ml_prediction.get("abusePatterns", [])
             if str(pattern).strip()
         ]
-        abuse_patterns = list(dict.fromkeys([*abuse_patterns, *ml_patterns]))
+        abuse_patterns = ml_patterns or abuse_patterns
         model_insight = ModelInsight(
             source="baseline-ml-workspace",
             severity=str(ml_prediction.get("severity", severity)),
@@ -424,6 +427,10 @@ def analyze_case(case: CaseRecord) -> AnalysisResult:
             escalationLevel=str(ml_prediction.get("escalationLevel", escalation_level)),
             escalationScore=int(ml_prediction.get("escalationScore", escalation_score)),
             abusePatterns=ml_patterns,
+        )
+    elif analysis_strategy == "ai-only":
+        raise RuntimeError(
+            "AI-only analysis is enabled, but no trained model is available. Train the model before running case analysis."
         )
 
     explanation = build_explanation(

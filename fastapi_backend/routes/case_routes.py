@@ -132,19 +132,28 @@ def analyze_saved_case(payload: AnalyzeCaseRequest) -> AnalysisResult:
         "locationLng",
         "emergencyContacts",
     ]:
-        if field_name in update_data and update_data[field_name] != "":
-            if field_name == "timelineEvents":
+        if field_name not in update_data:
+            continue
+        value = update_data[field_name]
+        if value is None:
+            continue
+        if isinstance(value, str) and value == "":
+            continue
+        if field_name == "timelineEvents":
                 timeline_events = payload.timelineEvents or []
                 case_record.timelineEvents = [
                     event if isinstance(event, TimelineEvent) else TimelineEvent(**event)
                     for event in timeline_events
                 ]
-            elif field_name == "emergencyContacts":
-                case_record.emergencyContacts = list(update_data[field_name] or [])
-            else:
-                setattr(case_record, field_name, update_data[field_name])
+        elif field_name == "emergencyContacts":
+            case_record.emergencyContacts = list(value or [])
+        else:
+            setattr(case_record, field_name, value)
 
-    analysis = analyze_case(case_record)
+    try:
+        analysis = analyze_case(case_record)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
     repeat_case_ids = find_repeat_offender_cases(analysis.repeatOffenderSignature, case_record.id)
     analysis.repeatOffenderCount = len(repeat_case_ids)
     analysis.repeatOffenderCaseIds = repeat_case_ids

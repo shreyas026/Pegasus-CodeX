@@ -149,8 +149,8 @@ export default function StatementPage() {
     <AppShell>
       <PageHeader
         eyebrow="Narrative Analysis"
-        title="Transform unstructured survivor narratives into explainable risk signals and actionable legal support outputs."
-        description="This step converts the case from static intake to analysis-ready evidence. The statement combines with case history, threat level, and chronology so the downstream result feels evidentiary rather than decorative."
+        title="Turn survivor narratives into structured risk insight, legal context, and response-ready case output."
+        description="This step combines the statement with case history, threat level, and chronology so the final result supports faster review and better response planning."
         aside={
           <div className="space-y-4 text-sm">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">

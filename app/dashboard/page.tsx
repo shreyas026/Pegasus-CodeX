@@ -32,6 +32,18 @@ function formatOptionalText(value: string, fallback = "Not provided") {
   return value.trim() || fallback;
 }
 
+function getAiStatusLabel(mode: string | null | undefined) {
+  if (!mode) {
+    return "Awaiting analysis";
+  }
+
+  if (mode === "ai-ml" || mode === "hybrid-ml") {
+    return "AI Model Active";
+  }
+
+  return "Case Analysis Active";
+}
+
 function buildMetricCards(queue: CaseSummary[]) {
   const analyzedCases = queue.filter((item) => item.riskScore !== null);
   const averageRiskScore = analyzedCases.length
@@ -122,7 +134,7 @@ export default function DashboardPage() {
       <PageHeader
         eyebrow="Command Center"
         title="Prioritize the most urgent survivors with clarity, context, and a real case queue that can be reopened on demand."
-        description="Phase 2 starts by making the workspace operational: saved case summaries, queue metrics, reopenable records, demo-ready posture, and a direct line from intake to review to briefing."
+        description="Monitor saved cases, review urgency, reopen active records, and move directly from intake to analysis, alerts, and legal preparation."
         aside={
           <div className="space-y-4">
             <div>
@@ -193,21 +205,21 @@ export default function DashboardPage() {
                 onClick={handleLoadDemoCase}
                 className="rounded-full bg-[var(--accent-strong)] px-4 py-2 text-sm font-medium text-white shadow-[0_14px_30px_rgba(48,33,23,0.18)] hover:bg-[var(--accent)]"
               >
-                Load Demo Case
+                Load Sample Case
               </button>
               <button
                 type="button"
                 onClick={handleResetCase}
                 className="rounded-full border border-[rgba(123,91,45,0.18)] bg-[rgba(255,255,255,0.55)] px-4 py-2 text-sm font-medium text-[var(--accent-strong)] hover:bg-[rgba(255,255,255,0.8)]"
               >
-                Reset Workspace
+                Start New Case
               </button>
             </div>
           </div>
         }
       />
 
-      <Card title="Queue Snapshot" subtitle="Live backend summaries for saved and analyzed cases">
+      <Card title="Queue Snapshot" subtitle="Live summaries of saved and analyzed cases">
         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           {metricCards.map((item) => (
             <div
@@ -224,13 +236,13 @@ export default function DashboardPage() {
       </Card>
 
       <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
-        <Card title="Saved Case Queue" subtitle="Reopen intake or analysis work from the backend store">
+        <Card title="Saved Case Queue" subtitle="Reopen intake or analysis work from the case library">
           <div className="space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm text-[var(--muted)]">
                 {queue.length > 0
                   ? `${queue.length} saved case${queue.length === 1 ? "" : "s"} available for review.`
-                  : "No backend-saved cases yet. Create a case intake to populate the queue."}
+                  : "No saved cases yet. Create a case intake to populate the queue."}
               </p>
               <button
                 type="button"
@@ -255,7 +267,7 @@ export default function DashboardPage() {
 
             {!isQueueLoading && queue.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-[rgba(123,91,45,0.22)] bg-[rgba(255,252,247,0.72)] px-4 py-6 text-sm text-[var(--muted)]">
-                The backend store is empty. Save an intake form to create the first queue item.
+                Save an intake form to create the first queue item.
               </div>
             ) : null}
 
@@ -365,64 +377,63 @@ export default function DashboardPage() {
                   <dd className="font-medium">{latestAnalysis.abusePatterns.length}</dd>
                 </div>
                 <div className="flex justify-between gap-4">
-                  <dt className="text-slate-600">Analysis Mode</dt>
-                  <dd className="font-medium">{latestAnalysis.analysisMode}</dd>
+                  <dt className="text-slate-600">AI Status</dt>
+                  <dd className="font-medium">{getAiStatusLabel(latestAnalysis.analysisMode)}</dd>
                 </div>
               </dl>
             ) : (
               <p className="text-sm leading-6 text-[var(--muted)]">
-                No analysis has been generated in this workspace yet.
+                No analysis has been generated for the current case yet.
               </p>
             )}
           </Card>
 
           <Card
-            title="Inference Story"
-            subtitle="Show the jury that the system supports explainable rules today and hybrid ML when trained artifacts are available."
+            title="AI Intelligence"
+            subtitle="Review the latest classification details and prediction signals for the current case."
           >
             <div className="space-y-4">
               <div className="rounded-[24px] border border-[rgba(123,91,45,0.14)] bg-[rgba(255,252,247,0.72)] p-5">
                 <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                  Live Engine
+                  AI Status
                 </p>
                 <p className="mt-3 text-2xl font-semibold text-[var(--accent-strong)]">
-                  {latestAnalysis?.analysisMode ?? "Awaiting analysis"}
+                  {getAiStatusLabel(latestAnalysis?.analysisMode)}
                 </p>
                 <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-                  The backend blends chronology-aware rules with ML predictions when trained artifacts are
-                  available, and falls back safely to explainable rules when they are not.
+                  The platform combines narrative details, chronology, and case history to classify
+                  severity, escalation, and response priority.
                 </p>
               </div>
 
               <div className="rounded-[24px] border border-[rgba(123,91,45,0.14)] bg-[rgba(255,252,247,0.72)] p-5">
                 <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                  ML Workspace Status
+                  Prediction Insight
                 </p>
                 {latestAnalysis && latestAnalysis.modelInsight ? (
                   <div className="mt-3 space-y-2 text-sm text-[var(--muted)]">
                     <p>
-                      Model source:{" "}
-                      <span className="font-semibold text-[var(--accent-strong)]">
-                        {latestAnalysis.modelInsight.source}
-                      </span>
-                    </p>
-                    <p>
-                      Predicted severity:{" "}
+                      Severity prediction:{" "}
                       <span className="font-semibold text-[var(--accent-strong)]">
                         {latestAnalysis.modelInsight.severity}
                       </span>
                     </p>
                     <p>
-                      Predicted escalation:{" "}
+                      Escalation prediction:{" "}
                       <span className="font-semibold text-[var(--accent-strong)]">
                         {latestAnalysis.modelInsight.escalationLevel}
+                      </span>
+                    </p>
+                    <p>
+                      Pattern labels:{" "}
+                      <span className="font-semibold text-[var(--accent-strong)]">
+                        {latestAnalysis.modelInsight.abusePatterns.join(", ") || "None"}
                       </span>
                     </p>
                   </div>
                 ) : (
                   <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-                    No saved ML artifacts are active yet. Train the baseline models in `ml_workspace`
-                    to turn on hybrid inference.
+                    Prediction details will appear here after the current case has been analyzed.
                   </p>
                 )}
               </div>

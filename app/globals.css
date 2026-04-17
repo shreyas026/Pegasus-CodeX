@@ -3,11 +3,12 @@
 :root {
   --bg: #ede9df;
   --bg-deep: #d8cfbf;
-  --panel: linear-gradient(135deg, rgba(255, 255, 255, 0.38), rgba(247, 243, 235, 0.66));
+  --panel:
+    linear-gradient(140deg, rgba(255, 255, 255, 0.44), rgba(255, 250, 243, 0.16) 42%, rgba(214, 196, 168, 0.18) 100%);
   --panel-strong: #fffdf8;
-  --panel-subtle: rgba(247, 243, 235, 0.72);
-  --border: rgba(74, 60, 41, 0.14);
-  --border-strong: rgba(74, 60, 41, 0.24);
+  --panel-subtle: rgba(255, 250, 244, 0.2);
+  --border: rgba(255, 255, 255, 0.34);
+  --border-strong: rgba(255, 255, 255, 0.5);
   --text: #0d1814;
   --muted: #5d554c;
   --accent: #7b5b2d;
@@ -23,19 +24,57 @@
 }
 
 html {
+  font-size: 15px;
   scroll-behavior: smooth;
   scroll-padding-top: 1.25rem;
+}
+
+@media (min-width: 1280px) {
+  html {
+    font-size: 16px;
+  }
 }
 
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top, rgba(199, 169, 118, 0.2), transparent 32%),
-    linear-gradient(180deg, #f8eee2 0%, var(--bg) 38%, var(--bg-deep) 100%);
+    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.74), transparent 14%),
+    radial-gradient(circle at 84% 16%, rgba(199, 169, 118, 0.24), transparent 18%),
+    radial-gradient(circle at 68% 72%, rgba(255, 255, 255, 0.34), transparent 18%),
+    linear-gradient(180deg, #f9f3eb 0%, #eee6d8 42%, #d9cfbe 100%);
   color: var(--text);
   font-family: "Aptos", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
   position: relative;
   overflow-x: hidden;
+  line-height: 1.45;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  inset: auto;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(26px);
+  opacity: 0.55;
+}
+
+body::before {
+  top: 10vh;
+  right: -2.5rem;
+  width: 11rem;
+  height: 11rem;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.9), rgba(225, 208, 180, 0.4) 42%, rgba(171, 144, 103, 0.08) 72%, transparent 78%);
+}
+
+body::after {
+  bottom: 8vh;
+  left: -2rem;
+  width: 9rem;
+  height: 9rem;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.85), rgba(214, 193, 161, 0.35) 48%, rgba(171, 144, 103, 0.08) 72%, transparent 80%);
 }
 
 .background-shell {
@@ -56,7 +95,10 @@ body {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: linear-gradient(180deg, #fcefe2 0%, var(--bg) 54%, var(--bg-deep) 100%);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.34), transparent 18%),
+    radial-gradient(circle at 78% 26%, rgba(199, 169, 118, 0.18), transparent 24%),
+    linear-gradient(180deg, #f9f2e8 0%, var(--bg) 54%, var(--bg-deep) 100%);
 }
 
 .video-bg::before, .video-bg::after, .video-bg-layer {
@@ -66,28 +108,28 @@ body {
   height: 150vh;
   top: -25vh;
   left: -25vw;
-  opacity: 0.82;
-  filter: blur(72px);
-  animation-duration: 25s;
+  opacity: 0.95;
+  filter: blur(86px);
+  animation-duration: 28s;
   animation-iteration-count: infinite;
   animation-timing-function: ease-in-out;
   animation-direction: alternate;
 }
 
 .video-bg::before {
-  background: radial-gradient(circle, rgba(123, 91, 45, 0.48) 0%, transparent 60%);
+  background: radial-gradient(circle, rgba(123, 91, 45, 0.24) 0%, rgba(199, 169, 118, 0.2) 32%, transparent 60%);
   animation-name: sway1;
 }
 
 .video-bg::after {
-  background: radial-gradient(circle, rgba(138, 47, 47, 0.28) 0%, transparent 50%);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.24) 0%, rgba(138, 47, 47, 0.08) 36%, transparent 56%);
   animation-name: sway2;
   animation-delay: -5s;
   animation-direction: alternate-reverse;
 }
 
 .video-bg-layer {
-  background: radial-gradient(circle, rgba(230, 210, 180, 0.62) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255, 247, 235, 0.62) 0%, rgba(230, 210, 180, 0.28) 44%, transparent 72%);
   animation-name: sway3;
   animation-delay: -12s;
 }
@@ -145,13 +187,15 @@ button {
 input,
 select,
 textarea {
-  @apply w-full rounded-xl border px-4 py-3 text-sm outline-none transition duration-200;
+  @apply w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition duration-200;
   border-color: var(--border-strong);
-  background-color: rgba(255, 255, 255, 0.3);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.38), rgba(255, 251, 245, 0.18));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.64),
-    0 14px 30px rgba(48, 33, 23, 0.04);
-  backdrop-filter: blur(22px);
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.18),
+    0 18px 36px rgba(48, 33, 23, 0.06);
+  backdrop-filter: blur(34px) saturate(1.25);
 }
 
 input:focus,
@@ -160,7 +204,8 @@ textarea:focus {
   @apply ring-2;
   border-color: var(--accent);
   --tw-ring-color: rgb(123 91 45 / 0.18);
-  background-color: rgba(255, 255, 255, 0.42);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.48), rgba(255, 250, 244, 0.22));
 }
 
 label {
@@ -184,26 +229,64 @@ button:hover {
   color: var(--accent);
 }
 
+.headline-balance {
+  text-wrap: balance;
+}
+
 .editorial-rule {
   height: 1px;
   background: linear-gradient(90deg, transparent 0%, rgba(123, 91, 45, 0.36) 20%, transparent 100%);
 }
 
 .surface-panel {
+  position: relative;
+  isolation: isolate;
   background: var(--panel);
   border: 1px solid var(--border);
   box-shadow:
-    0 22px 50px rgba(48, 33, 23, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(30px) saturate(1.18);
+    0 22px 44px rgba(48, 33, 23, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(36px) saturate(1.28);
+}
+
+.surface-panel::before,
+.surface-panel::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.surface-panel::before {
+  inset: 1px;
+  border-radius: inherit;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.44), rgba(255, 255, 255, 0.12) 34%, transparent 72%);
+  opacity: 0.92;
+  z-index: -1;
+}
+
+.surface-panel::after {
+  right: 1.1rem;
+  bottom: 1rem;
+  width: 5.4rem;
+  height: 5.4rem;
+  border-radius: 999px;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.58), rgba(255, 246, 232, 0.16) 44%, transparent 72%);
+  filter: blur(10px);
+  opacity: 0.7;
+  z-index: -1;
 }
 
 .status-pill {
   @apply inline-flex items-center rounded-full px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em];
-  background: rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.48), rgba(255, 250, 244, 0.18));
   color: var(--accent-strong);
-  border: 1px solid rgba(123, 91, 45, 0.18);
-  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    0 10px 20px rgba(48, 33, 23, 0.06);
+  backdrop-filter: blur(26px) saturate(1.18);
 }
 
 @keyframes pageFade {

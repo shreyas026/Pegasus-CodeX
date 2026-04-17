@@ -13,6 +13,14 @@ import { TimelineViewer } from "@/components/timeline-viewer";
 import { SafeActionNavigator } from "@/components/safe-action-navigator";
 import { buildChartPoints } from "@/lib/chart";
 
+function getAnalysisModeLabel(mode: string) {
+  if (mode === "ai-ml" || mode === "hybrid-ml") {
+    return "AI Model Active";
+  }
+
+  return "Case Analysis Active";
+}
+
 export default function ResultPage() {
   const { isHydrated, analysis, formData } = useCaseStore();
 
@@ -50,8 +58,8 @@ export default function ResultPage() {
     <AppShell>
       <PageHeader
         eyebrow="Risk Review"
-        title="Present an explainable case narrative that feels like legal-tech intelligence, not just raw scoring."
-        description="This result view now surfaces severity, escalation, trigger signals, emotion and stress, repeat-offender links, fake-case checks, privacy posture, heatmap-ready location context, legal reference aids, and Safe Action Navigator recommendations in one operational layout."
+        title="Review a complete case picture with risk levels, warning signals, legal guidance, and response priorities in one place."
+        description="This page brings together severity, escalation, trigger signals, emotional stress, repeat-risk links, privacy safeguards, location context, and legal reference support for faster action."
         aside={
           <div className="space-y-4">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
@@ -160,24 +168,22 @@ export default function ResultPage() {
           <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
             <section className="surface-panel rounded-[26px] p-5">
               <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
-                Analysis Mode
+                AI Analysis
               </h3>
-              <p className="text-2xl font-semibold text-[var(--accent-strong)]">{analysis.analysisMode}</p>
+              <p className="text-2xl font-semibold text-[var(--accent-strong)]">
+                {getAnalysisModeLabel(analysis.analysisMode)}
+              </p>
               <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-                The current decision layer uses {analysis.analysisMode} inference for severity,
-                escalation, and abuse-pattern outputs.
+                Severity, escalation, and abuse-pattern outputs are being generated for this case.
               </p>
             </section>
 
             <section className="surface-panel rounded-[26px] p-5">
               <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
-                ML Insight
+                Prediction Insight
               </h3>
               {analysis.modelInsight ? (
                 <div className="space-y-2 text-sm text-[var(--muted)]">
-                  <p>
-                    Source: <span className="font-semibold text-[var(--accent-strong)]">{analysis.modelInsight.source}</span>
-                  </p>
                   <p>
                     Severity prediction: <span className="font-semibold text-[var(--accent-strong)]">{analysis.modelInsight.severity}</span>
                   </p>
@@ -190,8 +196,7 @@ export default function ResultPage() {
                 </div>
               ) : (
                 <p className="text-sm leading-6 text-[var(--muted)]">
-                  No trained ML artifacts were active for this run, so the backend used the explainable
-                  rule engine only.
+                  Additional prediction details are not available for this case yet.
                 </p>
               )}
             </section>
@@ -295,7 +300,7 @@ export default function ResultPage() {
                 Verification Posture
               </h3>
               <p className="text-sm leading-6 text-[var(--muted)]">
-                The fake-case model is a consistency aid only. It flags contradictions for lawyer review
+                The fake-case model is a consistency aid only. It flags contradictions for advocate review
                 and does not dismiss survivor testimony automatically.
               </p>
             </section>

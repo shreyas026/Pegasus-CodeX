@@ -130,7 +130,53 @@ def _parse_timeline(raw_value: str) -> list[TimelineEvent]:
 def _parse_analysis(raw_value: str | None) -> AnalysisResult | None:
     if not raw_value:
         return None
-    return AnalysisResult(**json.loads(raw_value))
+
+    try:
+        payload = json.loads(raw_value)
+    except json.JSONDecodeError:
+        return None
+
+    if not isinstance(payload, dict):
+        return None
+
+    # Backfill newer required fields so older saved analyses do not break queue and heatmap views.
+    payload.setdefault("emotionSignals", [])
+    payload.setdefault("stressScore", 0)
+    payload.setdefault("stressLevel", "low")
+    payload.setdefault("fakeCaseFlags", [])
+    payload.setdefault("fakeCaseScore", 0)
+    payload.setdefault("repeatOffenderSignature", "")
+    payload.setdefault("repeatOffenderCount", 0)
+    payload.setdefault("repeatOffenderCaseIds", [])
+    payload.setdefault("riskAlertLevel", "none")
+    payload.setdefault("riskAlertMessage", "")
+    payload.setdefault("riskAlertTargets", [])
+    payload.setdefault(
+        "privacySummary",
+        {
+            "redactionApplied": False,
+            "encryptionAtRest": False,
+            "anonymousId": "",
+        },
+    )
+    payload.setdefault("locationSummary", "Area not mapped")
+    payload.setdefault("anonymizedStatement", "")
+    payload.setdefault("anonymizedTimeline", [])
+    payload.setdefault("timelineSummary", "No timeline summary available.")
+    payload.setdefault("legalReferenceSuggestions", [])
+    payload.setdefault(
+        "safeActionNavigator",
+        {
+            "urgency": "Awaiting review",
+            "immediateFlags": [],
+            "evidenceToCollect": [],
+            "missingQuestions": [],
+            "referralSuggestions": [],
+        },
+    )
+    payload.setdefault("generatedBrief", "")
+
+    return AnalysisResult(**payload)
 
 
 def _preview_text(text: str, limit: int = 180) -> str:
@@ -216,7 +262,7 @@ def save_case_record(case_record: CaseRecord) -> CaseRecord:
                 location_lng,
                 emergency_contacts_json,
                 analysis_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
                 updated_at = excluded.updated_at,
                 victim_name = excluded.victim_name,
@@ -503,7 +549,11 @@ def list_heatmap_points() -> list[HeatmapPoint]:
 
     buckets: dict[str, dict[str, object]] = {}
     for row in rows:
-        label = (row["location_label"] or "Unknown area").strip() or "Unknown area"
+        label = (row["location_label"] or "").strip()
+        if not label and row["location_lat"] is None and row["location_lng"] is None:
+            continue
+        if not label:
+            label = "Location shared"
         analysis = _parse_analysis(row["analysis_json"])
         risk_score = analysis.riskScore if analysis else 0
         high_risk = 1 if analysis and (analysis.riskScore >= 70 or analysis.severity == "high") else 0

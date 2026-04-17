@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { MapPinned } from "lucide-react";
 
 import { fetchHeatmap } from "@/lib/api";
@@ -27,24 +28,36 @@ function hotspotSize(point: HeatmapPoint) {
   return 28 + point.highRiskCount * 10 + Math.round(point.averageRiskScore / 8);
 }
 
+function describeHeatmapError(loadError: unknown) {
+  const message = loadError instanceof Error ? loadError.message : "Unable to load heatmap.";
+
+  if (message === "Failed to fetch") {
+    return "Heatmap service is temporarily unavailable. Please refresh this panel in a moment.";
+  }
+
+  return message;
+}
+
 export function HeatmapPanel() {
   const [points, setPoints] = useState<HeatmapPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadHeatmap() {
-      try {
-        const response = await fetchHeatmap();
-        setPoints(response);
-        setError(null);
-      } catch (loadError) {
-        setError(loadError instanceof Error ? loadError.message : "Unable to load heatmap.");
-      } finally {
-        setIsLoading(false);
-      }
+  async function loadHeatmap() {
+    setIsLoading(true);
+    try {
+      const response = await fetchHeatmap();
+      setPoints(response);
+      setError(null);
+    } catch (loadError) {
+      setPoints([]);
+      setError(describeHeatmapError(loadError));
+    } finally {
+      setIsLoading(false);
     }
+  }
 
+  useEffect(() => {
     void loadHeatmap();
   }, []);
 
@@ -97,18 +110,27 @@ export function HeatmapPanel() {
 
           {!isLoading && plottedPoints.length === 0 ? (
             <div className="absolute inset-x-8 bottom-8 rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.08)] px-4 py-4 text-sm text-[rgba(230,245,237,0.82)]">
-              Add case locations in the intake form to populate the heatmap.
+              No location-tagged cases yet. Add an area label during intake to populate the heatmap.
             </div>
           ) : null}
         </div>
 
         <div className="space-y-3">
           <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.6)] p-4">
-            <div className="flex items-center gap-2 text-[var(--accent)]">
-              <MapPinned className="h-4 w-4" />
-              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em]">
-                Deployment View
-              </p>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-[var(--accent)]">
+                <MapPinned className="h-4 w-4" />
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em]">
+                  Deployment View
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => void loadHeatmap()}
+                className="rounded-full border border-[var(--border)] bg-[rgba(255,255,255,0.7)] px-3 py-1.5 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[var(--accent-strong)] transition hover:bg-white"
+              >
+                Refresh
+              </button>
             </div>
             <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
               Areas with the highest high-risk counts should be prioritized for outreach, police
@@ -117,8 +139,9 @@ export function HeatmapPanel() {
           </div>
 
           {error ? (
-            <div className="rounded-2xl border border-[rgba(156,60,68,0.24)] bg-[rgba(156,60,68,0.1)] px-4 py-3 text-sm text-[#7a1f2a]">
-              {error}
+            <div className="rounded-2xl border border-[rgba(156,60,68,0.24)] bg-[linear-gradient(135deg,rgba(156,60,68,0.12),rgba(255,255,255,0.72))] px-4 py-4 text-sm text-[#7a1f2a]">
+              <p className="font-semibold">Heatmap unavailable</p>
+              <p className="mt-1 leading-6">{error}</p>
             </div>
           ) : null}
 
@@ -150,6 +173,22 @@ export function HeatmapPanel() {
               </p>
             </article>
           ))}
+
+          {!error && !isLoading && points.length === 0 ? (
+            <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.62)] p-4 text-sm text-[var(--muted)]">
+              <p className="font-semibold text-[var(--accent-strong)]">Heatmap prerequisites</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                <li>Add a location label in the intake form.</li>
+                <li>Save the case so it appears in area tracking.</li>
+              </ul>
+              <Link
+                href="/intake"
+                className="mt-3 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[rgba(255,255,255,0.75)] px-4 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-[var(--accent-strong)] transition hover:bg-white"
+              >
+                Go to Intake
+              </Link>
+            </div>
+          ) : null}
         </div>
       </div>
     </Card>

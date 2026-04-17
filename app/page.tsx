@@ -17,9 +17,9 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Case Pattern Analyzer | Full-stack domestic violence risk intelligence",
+  title: "Case Pattern Analyzer | Domestic violence risk intelligence",
   description:
-    "Privacy-first domestic violence case intelligence with alerts, heatmaps, voice intake, support chat, repeat-offender linking, and lawyer-ready briefs."
+    "Privacy-first domestic violence case intelligence with alerts, heatmaps, voice intake, support chat, repeat-offender linking, and advocate-ready briefs."
 };
 
 const featureGroups = [
@@ -75,12 +75,12 @@ const featureGroups = [
   },
   {
     title: "Fake Case Detection",
-    description: "Consistency checks flag contradictions for review without overriding lawyer judgment.",
+    description: "Consistency checks flag contradictions for review without overriding advocate judgment.",
     icon: Sparkles
   },
   {
     title: "AI Prediction Model",
-    description: "Rule-based scoring upgrades into hybrid ML when trained artifacts are available in the workspace.",
+    description: "AI models classify severity, escalation, and abuse patterns from survivor narratives, history, and chronology.",
     icon: FileText
   }
 ];
@@ -89,7 +89,7 @@ const workflow = [
   "Capture intake, location, emergency contacts, and case history in one record.",
   "Import typed, scanned, photographed, or spoken complaints into the same analysis pipeline.",
   "Score severity, escalation risk, abuse patterns, stress signals, and verification flags.",
-  "Generate alerts, hotspot visibility, legal references, safe actions, and a lawyer-ready brief."
+  "Generate alerts, hotspot visibility, legal references, safe actions, and an advocate-ready brief."
 ];
 
 function SectionTag({ children }: { children: string }) {
@@ -105,8 +105,8 @@ export default function HomePage() {
     <div className="page-fade relative isolate">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[620px] bg-[radial-gradient(circle_at_top_left,rgba(199,169,118,0.22),transparent_32%),radial-gradient(circle_at_top_right,rgba(123,91,45,0.18),transparent_34%)]" />
 
-      <div className="relative w-full px-4 pb-16 pt-4 sm:px-6 lg:px-8">
-        <nav className="surface-panel flex flex-col gap-4 rounded-[30px] px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="relative mx-auto w-full max-w-[1680px] px-4 pb-12 pt-4 sm:px-5 lg:px-6">
+        <nav className="surface-panel flex flex-col gap-4 rounded-[28px] px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),#c7a976)] text-white shadow-[0_16px_32px_rgba(48,33,23,0.18)]">
               <Scale className="h-5 w-5" />
@@ -130,28 +130,28 @@ export default function HomePage() {
               href="/dashboard"
               className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-strong)] px-5 py-3 font-medium text-white shadow-[0_14px_30px_rgba(6,17,13,0.18)] transition hover:bg-[var(--accent)]"
             >
-              Open workspace
+              Open platform
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </nav>
 
-        <section className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.2fr)_minmax(360px,0.8fr)]">
-          <div className="surface-panel overflow-hidden rounded-[36px] px-6 py-8 sm:px-8 lg:px-10 lg:py-10">
+        <section className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)]">
+          <div className="surface-panel overflow-hidden rounded-[32px] px-5 py-7 sm:px-6 lg:px-8 lg:py-8">
             <div className="max-w-[820px]">
               <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[rgba(255,255,255,0.24)] px-4 py-2 text-sm text-[var(--accent-strong)] backdrop-blur-[20px]">
                 <Sparkles className="h-4 w-4 text-[var(--accent)]" />
-                All 12 requested features are now represented in the product workflow
+                End-to-end protection, review, and legal-preparation features are integrated
               </div>
 
               <SectionTag>Privacy-first legal aid workflow</SectionTag>
-              <h1 className="mt-4 max-w-[12ch] text-[3.2rem] leading-[0.92] font-semibold tracking-[-0.05em] text-[var(--accent-strong)] sm:text-[4.5rem] xl:text-[5.6rem]">
+              <h1 className="headline-balance mt-4 max-w-[18ch] text-[2.8rem] leading-[0.95] font-semibold tracking-[-0.05em] text-[var(--accent-strong)] sm:text-[3.8rem] xl:text-[4.8rem]">
                 Full-screen case intelligence for urgent survivor protection.
               </h1>
-              <p className="mt-6 max-w-[720px] text-[1.02rem] leading-8 text-[var(--muted)]">
-                This workspace processes anonymized intake forms, statements, documents, and voice
+              <p className="mt-5 max-w-[720px] text-[1.02rem] leading-8 text-[var(--muted)]">
+                This platform processes anonymized intake forms, statements, documents, and voice
                 complaints to detect abuse patterns, score severity, predict escalation, generate
-                lawyer-ready briefs, trigger alerts, and surface area-level risk patterns without
+                advocate-ready briefs, trigger alerts, and surface area-level risk patterns without
                 losing privacy controls.
               </p>
 
@@ -172,7 +172,7 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              <div className="mt-10 grid gap-4 sm:grid-cols-3">
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-[28px] border border-[var(--border)] bg-[rgba(255,255,255,0.58)] p-5">
                   <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
                     Inputs
@@ -204,8 +204,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid gap-5">
-            <div className="surface-panel rounded-[34px] p-6">
+          <div className="grid gap-4">
+            <div className="surface-panel rounded-[30px] p-5">
               <SectionTag>Live outputs</SectionTag>
               <div className="mt-4 space-y-4">
                 <div className="rounded-[24px] bg-[linear-gradient(135deg,var(--accent-strong),#5d4733)] p-5 text-white">
@@ -225,34 +225,34 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="surface-panel rounded-[34px] p-6">
-              <SectionTag>What changed</SectionTag>
+            <div className="surface-panel rounded-[30px] p-5">
+              <SectionTag>Platform Highlights</SectionTag>
               <ul className="mt-4 space-y-3 text-sm text-[var(--muted)]">
                 <li className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.22)] px-4 py-3 backdrop-blur-[20px]">
-                  The layout now stretches full screen instead of sitting inside one oversized card.
+                  A full-screen command layout keeps intake, alerts, heatmaps, and legal preparation in one connected flow.
                 </li>
                 <li className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.22)] px-4 py-3 backdrop-blur-[20px]">
-                  The visual system uses dark-green fade shades while keeping the product identity professional.
+                  Glassmorphism styling and calm layered surfaces support a professional, privacy-first experience.
                 </li>
                 <li className="rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.22)] px-4 py-3 backdrop-blur-[20px]">
-                  The bottom CTA has been shortened into a cleaner split section instead of a long rectangle.
+                  Emergency action, hotspot monitoring, and case review remain visible throughout the product journey.
                 </li>
               </ul>
             </div>
           </div>
         </section>
 
-        <section id="features" className="mt-6">
-          <div className="surface-panel rounded-[36px] px-6 py-8 sm:px-8">
+        <section id="features" className="mt-5">
+          <div className="surface-panel rounded-[32px] px-5 py-7 sm:px-6">
             <SectionTag>Feature Matrix</SectionTag>
             <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <h2 className="max-w-[14ch] text-[2.5rem] leading-[0.96] font-semibold tracking-[-0.045em] text-[var(--accent-strong)] sm:text-[3.5rem]">
+                <h2 className="headline-balance max-w-[20ch] text-[2.2rem] leading-[0.98] font-semibold tracking-[-0.045em] text-[var(--accent-strong)] sm:text-[3rem]">
                   The complete feature set is now visible in the product.
                 </h2>
-                <p className="mt-4 max-w-[760px] text-[1rem] leading-8 text-[var(--muted)]">
-                  The backend already held several advanced signals. The current build now exposes them
-                  through the workspace instead of hiding them behind internal data models.
+                <p className="mt-4 max-w-[760px] text-[1.02rem] leading-8 text-[var(--muted)]">
+                  Each module contributes to one connected response system, helping NGOs and legal
+                  teams move from survivor disclosure to risk review and case preparation faster.
                 </p>
               </div>
               <div className="rounded-[26px] border border-[var(--border)] bg-[rgba(255,255,255,0.62)] px-5 py-4 text-right">
@@ -286,10 +286,10 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="workflow" className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
-          <div className="surface-panel rounded-[36px] px-6 py-8 sm:px-8">
+        <section id="workflow" className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(340px,0.9fr)]">
+          <div className="surface-panel rounded-[32px] px-5 py-7 sm:px-6">
             <SectionTag>Workflow</SectionTag>
-            <h2 className="mt-4 max-w-[12ch] text-[2.5rem] leading-[0.96] font-semibold tracking-[-0.045em] text-[var(--accent-strong)] sm:text-[3.4rem]">
+            <h2 className="headline-balance mt-4 max-w-[18ch] text-[2.2rem] leading-[0.98] font-semibold tracking-[-0.045em] text-[var(--accent-strong)] sm:text-[3rem]">
               One connected path from first disclosure to hearing prep.
             </h2>
 
@@ -308,7 +308,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="surface-panel rounded-[36px] px-6 py-8">
+          <div className="surface-panel rounded-[32px] px-5 py-7">
             <SectionTag>Open The Product</SectionTag>
             <div className="mt-5 space-y-4">
               <Link

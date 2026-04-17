@@ -1,0 +1,25 @@
+{
+  "training_rows": 6,
+  "severity_labels": [
+    "high",
+    "low",
+    "medium"
+  ],
+  "escalation_labels": [
+    "high",
+    "low",
+    "medium"
+  ],
+  "pattern_labels": [
+    "emotional",
+    "financial",
+    "physical",
+    "stalking",
+    "verbal"
+  ],
+  "features": [
+    "modelText",
+    "age",
+    "priorComplaintsCount"
+  ]
+}

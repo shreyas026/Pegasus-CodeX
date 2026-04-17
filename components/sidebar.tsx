@@ -17,27 +17,27 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="surface-panel sticky top-3 w-full overflow-hidden rounded-[30px] text-[var(--accent-strong)] lg:w-[320px] lg:min-h-[calc(100vh-1.5rem)]">
-      <div className="bg-[radial-gradient(circle_at_top_left,_rgba(199,169,118,0.22),_transparent_38%),linear-gradient(180deg,rgba(255,252,247,0.86),rgba(243,235,221,0.66))] p-5">
+    <aside className="surface-panel sticky top-4 w-full overflow-hidden rounded-[28px] text-[var(--accent-strong)] lg:w-[296px] lg:flex-shrink-0 lg:min-h-[calc(100vh-2rem)]">
+      <div className="bg-[radial-gradient(circle_at_top_left,_rgba(199,169,118,0.22),_transparent_38%),linear-gradient(180deg,rgba(255,252,247,0.86),rgba(243,235,221,0.66))] p-4">
         <div className="flex items-center justify-between">
           <span className="status-pill">Safety AI</span>
           <span className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
             Full Suite
           </span>
         </div>
-        <div className="mt-8">
+        <div className="mt-6">
           <p className="display-kicker text-[0.68rem] font-semibold uppercase tracking-[0.24em]">
             Domestic Violence
           </p>
-          <h1 className="mt-3 text-[2rem] leading-tight font-semibold">Case Pattern Analyzer</h1>
+          <h1 className="mt-3 text-[1.8rem] leading-tight font-semibold">Case Pattern Analyzer</h1>
           <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
-            Privacy-first legal-tech workspace for intake review, chronology analysis, risk
+            Privacy-first case intelligence platform for intake review, chronology analysis, risk
             prioritization, and hearing-ready briefs.
           </p>
         </div>
       </div>
-      <div className="editorial-rule mx-5" />
-      <nav className="space-y-2 px-4 py-5">
+      <div className="editorial-rule mx-4" />
+      <nav className="space-y-2 px-3 py-4">
         {navItems.map((item) => {
           const isActive = item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
           return (
@@ -62,12 +62,12 @@ export function Sidebar() {
           );
         })}
       </nav>
-      <div className="mx-4 mb-4 rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.22)] p-4 backdrop-blur-[24px]">
+      <div className="mx-3 mb-3 rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.22)] p-4 backdrop-blur-[24px]">
         <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
           Feature Coverage
         </p>
         <p className="mt-2 text-sm leading-6 text-[var(--accent-strong)]">
-          Explainable scoring, voice intake, real-time alerts, support chat, heatmaps, repeat-offender linking, privacy controls, and brief generation.
+          AI analysis, voice intake, real-time alerts, support chat, heatmaps, repeat-offender linking, privacy controls, and brief generation.
         </p>
       </div>
     </aside>
