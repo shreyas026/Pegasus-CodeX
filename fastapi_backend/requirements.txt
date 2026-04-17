@@ -9,3 +9,4 @@ pillow
 pymupdf
 rapidocr-onnxruntime
 faster-whisper
+cryptography

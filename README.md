@@ -91,6 +91,34 @@ Legal-aid NGOs face heavy workloads, unstructured narratives, and delayed prepar
 5. In another terminal, `cd fastapi_backend`, setup a venv, install Python requirements, and `uvicorn main:app`.
 6. Optional retraining: `python ml_workspace/src/train_baselines.py --data ml_workspace/data/sample_cases.csv --artifacts ml_workspace/artifacts`
 
+## Deployment
+
+### Frontend (Vercel)
+
+1. Import this repo in Vercel.
+2. Set environment variable:
+	- `NEXT_PUBLIC_API_BASE_URL=https://<your-render-service>.onrender.com`
+3. Deploy.
+
+### Backend (Render)
+
+This repo includes [render.yaml](render.yaml). You can deploy from Blueprint or create a Web Service manually.
+
+- Runtime: Python
+- Root directory: `fastapi_backend`
+- Build command: `pip install -r requirements.txt`
+- Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- Health check path: `/health`
+
+Required environment variables on Render:
+
+- `DV_CORS_ORIGINS=https://<your-vercel-domain>`
+- `DV_ANALYSIS_STRATEGY=hybrid`
+
+Optional:
+
+- `DV_CRYPTO_KEY=<fernet-key>` for encrypted text at rest.
+
 ### Current AI Status
 
 - The shipped prototype includes trained baseline ML artifacts in `ml_workspace/artifacts/`.

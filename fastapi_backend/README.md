@@ -41,3 +41,16 @@ uvicorn main:app --reload
 - `/case/analyze` returns severity, escalation, abuse patterns, emotion/stress, fake-case signals, alert metadata, privacy metadata, and a generated brief.
 - `/case/{id}/documents` stores uploaded PDFs/images/audio against a case, extracts text directly when possible, falls back to OCR for scanned inputs, and uses speech-to-text for audio files.
 - The backend requirements include the runtime dependencies needed to load the trained scikit-learn artifacts.
+
+## Deployment (Render)
+
+- Root directory: `fastapi_backend`
+- Build command: `pip install -r requirements.txt`
+- Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+- Health check path: `/health`
+
+Environment variables:
+
+- `DV_CORS_ORIGINS=https://<your-vercel-domain>`
+- `DV_ANALYSIS_STRATEGY=hybrid`
+- Optional: `DV_CRYPTO_KEY=<fernet-key>`

@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: dv-case-analyzer-api
+    runtime: python
+    rootDir: fastapi_backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DV_ANALYSIS_STRATEGY
+        value: hybrid
+      - key: DV_CORS_ORIGINS
+        sync: false
+      - key: DV_CRYPTO_KEY
+        sync: false

@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -5,6 +7,11 @@ from routes.alert_routes import router as alert_router
 from routes.case_routes import router as case_router
 from routes.support_routes import router as support_router
 from storage import init_storage
+
+
+def _parse_cors_origins() -> list[str]:
+    raw = os.getenv("DV_CORS_ORIGINS", "")
+    return [origin.strip() for origin in raw.split(",") if origin.strip()]
 
 
 app = FastAPI(
@@ -15,7 +22,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[],
+    allow_origins=_parse_cors_origins(),
     allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
