@@ -18,16 +18,20 @@ class TimelineEvent(BaseModel):
 
 
 class CaseInput(BaseModel):
-    victimName: str = Field(..., min_length=1)
-    age: int = Field(..., ge=0, le=120)
-    abuseType: str = Field(..., min_length=1)
-    incidentDescription: str = Field(..., min_length=1)
-    frequency: str = Field(..., min_length=1)
-    threatLevel: str = Field(..., min_length=1)
+    victimName: str = Field(default="")
+    age: int = Field(default=0, ge=0, le=120)
+    abuseType: str = Field(default="")
+    incidentDescription: str = Field(default="")
+    frequency: str = Field(default="")
+    threatLevel: str = Field(default="")
     statement: str = Field(default="")
     historySummary: str = Field(default="")
     priorComplaintsCount: int = Field(default=0, ge=0)
     timelineEvents: List[TimelineEvent] = Field(default_factory=list)
+    locationLabel: str = Field(default="")
+    locationLat: Optional[float] = None
+    locationLng: Optional[float] = None
+    emergencyContacts: List[str] = Field(default_factory=list)
 
     @field_validator(
         "victimName",
@@ -49,6 +53,8 @@ class CaseInput(BaseModel):
     @classmethod
     def validate_frequency(cls, value: str) -> str:
         normalized_value = value.lower()
+        if normalized_value == "":
+            return normalized_value
         allowed_values = {"rare", "occasional", "frequent"}
         if normalized_value not in allowed_values:
             raise ValueError("frequency must be one of: rare, occasional, frequent")
@@ -58,6 +64,8 @@ class CaseInput(BaseModel):
     @classmethod
     def validate_threat_level(cls, value: str) -> str:
         normalized_value = value.lower()
+        if normalized_value == "":
+            return normalized_value
         allowed_values = {"low", "medium", "high"}
         if normalized_value not in allowed_values:
             raise ValueError("threatLevel must be one of: low, medium, high")
@@ -66,15 +74,48 @@ class CaseInput(BaseModel):
 
 class CaseRecord(CaseInput):
     id: str
+    anonymousId: str
     createdAt: str
     updatedAt: str
     analysis: Optional["AnalysisResult"] = None
+    documents: List["CaseDocument"] = Field(default_factory=list)
 
 
 class CreateCaseResponse(BaseModel):
     message: str
     caseId: str
     data: CaseRecord
+
+
+class CaseDocument(BaseModel):
+    id: str
+    fileName: str
+    contentType: str
+    pageCount: int = Field(..., ge=1)
+    usedOcr: bool
+    textLength: int = Field(..., ge=0)
+    preview: str
+    uploadedAt: str
+
+
+class ExtractedFieldSuggestions(BaseModel):
+    victimName: Optional[str] = None
+    age: Optional[int] = Field(default=None, ge=0, le=120)
+    abuseType: Optional[str] = None
+    frequency: Optional[str] = None
+    threatLevel: Optional[str] = None
+    incidentDescription: Optional[str] = None
+    historySummary: Optional[str] = None
+    timelineEvents: List[TimelineEvent] = Field(default_factory=list)
+
+
+class DocumentUploadResponse(BaseModel):
+    message: str
+    document: CaseDocument
+    extractedText: str = Field(..., min_length=1)
+    processingMode: str
+    processingEngine: str
+    suggestedFields: ExtractedFieldSuggestions
 
 
 class AnalyzeCaseRequest(BaseModel):
@@ -89,6 +130,10 @@ class AnalyzeCaseRequest(BaseModel):
     historySummary: Optional[str] = None
     priorComplaintsCount: Optional[int] = Field(default=None, ge=0)
     timelineEvents: Optional[List[TimelineEvent]] = None
+    locationLabel: Optional[str] = None
+    locationLat: Optional[float] = None
+    locationLng: Optional[float] = None
+    emergencyContacts: Optional[List[str]] = None
 
     @field_validator(
         "caseId",
@@ -163,6 +208,19 @@ class AnalysisResult(BaseModel):
     abusePatterns: List[str]
     triggerFlags: List[str]
     explanation: str
+    emotionSignals: List[str]
+    stressScore: int = Field(..., ge=0, le=100)
+    stressLevel: str
+    fakeCaseFlags: List[str]
+    fakeCaseScore: int = Field(..., ge=0, le=100)
+    repeatOffenderSignature: str
+    repeatOffenderCount: int = Field(..., ge=0)
+    repeatOffenderCaseIds: List[str]
+    riskAlertLevel: str
+    riskAlertMessage: str
+    riskAlertTargets: List[str]
+    privacySummary: dict
+    locationSummary: str
     anonymizedStatement: str
     anonymizedTimeline: List[TimelineEvent]
     timelineSummary: str
@@ -174,20 +232,71 @@ class AnalysisResult(BaseModel):
 
 class CaseSummary(BaseModel):
     id: str
+    anonymousId: str
     victimName: str
     abuseType: str
     threatLevel: str
     frequency: str
     priorComplaintsCount: int
     timelineEventCount: int
+    documentCount: int
     status: str
     severity: Optional[str] = None
     riskScore: Optional[int] = None
     escalationLevel: Optional[str] = None
     urgency: Optional[str] = None
     analysisMode: Optional[str] = None
+    locationLabel: Optional[str] = None
     createdAt: str
     updatedAt: str
+
+
+class AlertRecord(BaseModel):
+    id: str
+    caseId: str
+    alertType: str
+    level: str
+    message: str
+    targets: List[str]
+    status: str
+    createdAt: str
+    resolvedAt: Optional[str] = None
+
+
+class AlertCreateRequest(BaseModel):
+    caseId: str
+    alertType: str = "manual"
+    message: str
+    level: str = "high"
+    targets: List[str] = Field(default_factory=list)
+    locationLabel: Optional[str] = None
+    locationLat: Optional[float] = None
+    locationLng: Optional[float] = None
+
+
+class AlertAcknowledgeResponse(BaseModel):
+    message: str
+    alert: AlertRecord
+
+
+class HeatmapPoint(BaseModel):
+    label: str
+    totalCount: int
+    highRiskCount: int
+    averageRiskScore: int
+    locationLat: Optional[float] = None
+    locationLng: Optional[float] = None
+
+
+class SupportChatRequest(BaseModel):
+    message: str
+    caseId: Optional[str] = None
+
+
+class SupportChatResponse(BaseModel):
+    reply: str
+    suggestedActions: List[str]
+    resources: List[str]
 
 
 CaseRecord.model_rebuild()

@@ -4,11 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { AppShell } from "@/components/app-shell";
+import { AlertsPanel } from "@/components/alerts-panel";
 import { Card } from "@/components/card";
+import { HeatmapPanel } from "@/components/heatmap-panel";
 import { useCaseStore } from "@/components/case-provider";
 import { PageHeader } from "@/components/page-header";
+import { SupportChatPanel } from "@/components/support-chat-panel";
 import { fetchCaseQueue, getCaseById } from "@/lib/api";
-import { mockAnalysisResult, mockIntakeData } from "@/lib/mock-data";
 import type { CaseSummary } from "@/lib/types";
 
 function formatCaseDate(value: string) {
@@ -24,6 +26,10 @@ function formatCaseTime(value: string) {
     hour: "2-digit",
     minute: "2-digit"
   }).format(new Date(value));
+}
+
+function formatOptionalText(value: string, fallback = "Not provided") {
+  return value.trim() || fallback;
 }
 
 function buildMetricCards(queue: CaseSummary[]) {
@@ -44,19 +50,24 @@ function buildMetricCards(queue: CaseSummary[]) {
       label: "Awaiting Analysis",
       value: queue.filter((item) => item.status !== "analyzed").length
     },
-    { label: "Avg. Risk Score", value: averageRiskScore }
+    { label: "Avg. Risk Score", value: averageRiskScore },
+    {
+      label: "Linked Documents",
+      value: queue.reduce((sum, item) => sum + item.documentCount, 0)
+    }
   ];
 }
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { isHydrated, formData, analysis, loadCase, loadDemoCase, resetCase } = useCaseStore();
+  const { isHydrated, caseId, formData, analysis, documents, loadCase, loadDemoCase, resetCase } =
+    useCaseStore();
   const [queue, setQueue] = useState<CaseSummary[]>([]);
   const [isQueueLoading, setIsQueueLoading] = useState(false);
   const [queueError, setQueueError] = useState<string | null>(null);
   const [openingCaseId, setOpeningCaseId] = useState<string | null>(null);
-  const latestIntake = isHydrated ? formData : mockIntakeData;
-  const latestAnalysis = isHydrated && analysis ? analysis : mockAnalysisResult;
+  const latestIntake = formData;
+  const latestAnalysis = analysis;
   const metricCards = useMemo(() => buildMetricCards(queue), [queue]);
 
   async function loadQueue() {
@@ -118,16 +129,44 @@ export default function DashboardPage() {
               <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
                 Current Case Posture
               </p>
-              <p className="mt-3 text-3xl font-semibold text-[var(--accent-strong)]">
-                {latestAnalysis.riskScore}/100
+              {latestAnalysis ? (
+                <>
+                  <p className="mt-3 text-3xl font-semibold text-[var(--accent-strong)]">
+                    {latestAnalysis.riskScore}/100
+                  </p>
+                  <p className="mt-2 text-sm text-[var(--muted)]">
+                    Risk score with {latestAnalysis.escalationLevel} escalation and{" "}
+                    {latestAnalysis.abusePatterns.length} abuse patterns surfaced.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="mt-3 text-3xl font-semibold text-[var(--accent-strong)]">
+                    No analysis yet
+                  </p>
+                  <p className="mt-2 text-sm text-[var(--muted)]">
+                    Save an intake or submit a statement to generate the first analysis result.
+                  </p>
+                </>
+              )}
+            </div>
+            <div className="editorial-rule" />
+            <div className="space-y-2 text-sm text-[var(--muted)]">
+              <p>
+                Area:{" "}
+                <span className="font-semibold text-[var(--accent-strong)]">
+                  {latestIntake.locationLabel || "Not mapped yet"}
+                </span>
               </p>
-              <p className="mt-2 text-sm text-[var(--muted)]">
-                Risk score with {latestAnalysis.escalationLevel} escalation and{" "}
-                {latestAnalysis.abusePatterns.length} abuse patterns surfaced.
+              <p>
+                Emergency contacts:{" "}
+                <span className="font-semibold text-[var(--accent-strong)]">
+                  {latestIntake.emergencyContacts.length}
+                </span>
               </p>
             </div>
             <div className="editorial-rule" />
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid gap-3 text-sm sm:grid-cols-3">
               <div className="rounded-2xl border border-[rgba(123,91,45,0.14)] bg-[rgba(255,255,255,0.55)] p-3">
                 <p className="text-[var(--muted)]">Timeline</p>
                 <p className="mt-1 text-lg font-semibold text-[var(--accent-strong)]">
@@ -137,7 +176,13 @@ export default function DashboardPage() {
               <div className="rounded-2xl border border-[rgba(123,91,45,0.14)] bg-[rgba(255,255,255,0.55)] p-3">
                 <p className="text-[var(--muted)]">Urgency</p>
                 <p className="mt-1 text-lg font-semibold text-[var(--accent-strong)]">
-                  {latestAnalysis.safeActionNavigator.urgency}
+                  {latestAnalysis?.safeActionNavigator.urgency ?? "Awaiting analysis"}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-[rgba(123,91,45,0.14)] bg-[rgba(255,255,255,0.55)] p-3">
+                <p className="text-[var(--muted)]">Documents</p>
+                <p className="mt-1 text-lg font-semibold text-[var(--accent-strong)]">
+                  {documents.length}
                 </p>
               </div>
             </div>
@@ -163,7 +208,7 @@ export default function DashboardPage() {
       />
 
       <Card title="Queue Snapshot" subtitle="Live backend summaries for saved and analyzed cases">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           {metricCards.map((item) => (
             <div
               key={item.label}
@@ -225,16 +270,17 @@ export default function DashboardPage() {
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="text-xl font-semibold text-[var(--accent-strong)]">
-                            {item.victimName}
+                            {formatOptionalText(item.victimName, "Untitled case")}
                           </h3>
                           <span className="status-pill">{item.status}</span>
                           {item.severity ? <span className="status-pill">{item.severity} severity</span> : null}
                         </div>
                         <div className="grid gap-2 text-sm text-[var(--muted)] md:grid-cols-2">
-                          <p>Abuse type: <span className="font-semibold text-[var(--accent-strong)]">{item.abuseType}</span></p>
-                          <p>Threat level: <span className="font-semibold text-[var(--accent-strong)]">{item.threatLevel}</span></p>
+                          <p>Abuse type: <span className="font-semibold text-[var(--accent-strong)]">{formatOptionalText(item.abuseType)}</span></p>
+                          <p>Threat level: <span className="font-semibold text-[var(--accent-strong)]">{formatOptionalText(item.threatLevel)}</span></p>
                           <p>Complaints: <span className="font-semibold text-[var(--accent-strong)]">{item.priorComplaintsCount}</span></p>
                           <p>Timeline events: <span className="font-semibold text-[var(--accent-strong)]">{item.timelineEventCount}</span></p>
+                          <p>Documents: <span className="font-semibold text-[var(--accent-strong)]">{item.documentCount}</span></p>
                           <p>Updated: <span className="font-semibold text-[var(--accent-strong)]">{formatCaseDate(item.updatedAt)} at {formatCaseTime(item.updatedAt)}</span></p>
                           <p>Urgency: <span className="font-semibold text-[var(--accent-strong)]">{item.urgency ?? "Awaiting statement analysis"}</span></p>
                         </div>
@@ -270,46 +316,64 @@ export default function DashboardPage() {
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between gap-4">
                 <dt className="text-slate-600">Victim Name</dt>
-                <dd className="font-medium">{latestIntake.victimName}</dd>
+                <dd className="font-medium">{formatOptionalText(latestIntake.victimName)}</dd>
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-slate-600">Type of Abuse</dt>
-                <dd className="font-medium">{latestIntake.abuseType}</dd>
+                <dd className="font-medium">{formatOptionalText(latestIntake.abuseType)}</dd>
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-slate-600">Threat Level</dt>
-                <dd className="font-medium">{latestIntake.threatLevel}</dd>
+                <dd className="font-medium">{formatOptionalText(latestIntake.threatLevel)}</dd>
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-slate-600">Timeline Events</dt>
                 <dd className="font-medium">{latestIntake.timelineEvents.length}</dd>
               </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-slate-600">Linked Documents</dt>
+                <dd className="font-medium">{documents.length}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-slate-600">Area</dt>
+                <dd className="font-medium">{formatOptionalText(latestIntake.locationLabel)}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-slate-600">Emergency Contacts</dt>
+                <dd className="font-medium">{latestIntake.emergencyContacts.length}</dd>
+              </div>
             </dl>
           </Card>
 
           <Card title="Most Recent Analysis">
-            <dl className="space-y-2 text-sm">
-              <div className="flex justify-between gap-4">
-                <dt className="text-slate-600">Severity</dt>
-                <dd className="font-medium">{latestAnalysis.severity}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-slate-600">Risk Score</dt>
-                <dd className="font-medium">{latestAnalysis.riskScore}/100</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-slate-600">Escalation</dt>
-                <dd className="font-medium">{latestAnalysis.escalationLevel}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-slate-600">Pattern Count</dt>
-                <dd className="font-medium">{latestAnalysis.abusePatterns.length}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-slate-600">Analysis Mode</dt>
-                <dd className="font-medium">{latestAnalysis.analysisMode}</dd>
-              </div>
-            </dl>
+            {latestAnalysis ? (
+              <dl className="space-y-2 text-sm">
+                <div className="flex justify-between gap-4">
+                  <dt className="text-slate-600">Severity</dt>
+                  <dd className="font-medium">{latestAnalysis.severity}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-slate-600">Risk Score</dt>
+                  <dd className="font-medium">{latestAnalysis.riskScore}/100</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-slate-600">Escalation</dt>
+                  <dd className="font-medium">{latestAnalysis.escalationLevel}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-slate-600">Pattern Count</dt>
+                  <dd className="font-medium">{latestAnalysis.abusePatterns.length}</dd>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <dt className="text-slate-600">Analysis Mode</dt>
+                  <dd className="font-medium">{latestAnalysis.analysisMode}</dd>
+                </div>
+              </dl>
+            ) : (
+              <p className="text-sm leading-6 text-[var(--muted)]">
+                No analysis has been generated in this workspace yet.
+              </p>
+            )}
           </Card>
 
           <Card
@@ -322,7 +386,7 @@ export default function DashboardPage() {
                   Live Engine
                 </p>
                 <p className="mt-3 text-2xl font-semibold text-[var(--accent-strong)]">
-                  {latestAnalysis.analysisMode}
+                  {latestAnalysis?.analysisMode ?? "Awaiting analysis"}
                 </p>
                 <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
                   The backend blends chronology-aware rules with ML predictions when trained artifacts are
@@ -334,7 +398,7 @@ export default function DashboardPage() {
                 <p className="text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
                   ML Workspace Status
                 </p>
-                {latestAnalysis.modelInsight ? (
+                {latestAnalysis && latestAnalysis.modelInsight ? (
                   <div className="mt-3 space-y-2 text-sm text-[var(--muted)]">
                     <p>
                       Model source:{" "}
@@ -366,6 +430,13 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1.05fr_0.95fr]">
+        <AlertsPanel currentCaseId={caseId} />
+        <HeatmapPanel />
+      </div>
+
+      <SupportChatPanel caseId={caseId} />
     </AppShell>
   );
 }

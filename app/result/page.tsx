@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/page-header";
 import { RiskChart } from "@/components/risk-chart";
 import { ResultSummary } from "@/components/result-summary";
 import { TimelineViewer } from "@/components/timeline-viewer";
+import { SafeActionNavigator } from "@/components/safe-action-navigator";
 import { buildChartPoints } from "@/lib/chart";
 
 export default function ResultPage() {
@@ -50,7 +51,7 @@ export default function ResultPage() {
       <PageHeader
         eyebrow="Risk Review"
         title="Present an explainable case narrative that feels like legal-tech intelligence, not just raw scoring."
-        description="This result view surfaces severity, escalation, trigger signals, chronology, legal reference aids, and Safe Action Navigator recommendations in one jury-facing operational layout."
+        description="This result view now surfaces severity, escalation, trigger signals, emotion and stress, repeat-offender links, fake-case checks, privacy posture, heatmap-ready location context, legal reference aids, and Safe Action Navigator recommendations in one operational layout."
         aside={
           <div className="space-y-4">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
@@ -69,6 +70,12 @@ export default function ResultPage() {
                   {analysis.legalReferenceSuggestions.length}
                 </p>
               </div>
+              <div className="rounded-2xl border border-[rgba(123,91,45,0.14)] bg-[rgba(255,255,255,0.55)] p-4">
+                <p className="text-[var(--muted)]">Stress Level</p>
+                <p className="mt-2 text-xl font-semibold text-[var(--accent-strong)]">
+                  {analysis.stressLevel}
+                </p>
+              </div>
             </div>
           </div>
         }
@@ -78,27 +85,53 @@ export default function ResultPage() {
         <div className="space-y-6">
           <ResultSummary result={analysis} />
 
+          <section className="rounded-[28px] border border-[var(--border)] bg-[linear-gradient(135deg,rgba(156,60,68,0.12),rgba(255,255,255,0.72))] p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p className="display-kicker text-[0.68rem] font-semibold uppercase tracking-[0.24em]">
+                  Risk Alert System
+                </p>
+                <h3 className="mt-2 text-[1.4rem] font-semibold text-[var(--accent-strong)]">
+                  {analysis.riskAlertLevel === "none"
+                    ? "No automatic alert was triggered for this case"
+                    : `${analysis.riskAlertLevel.toUpperCase()} alert triggered`}
+                </h3>
+                <p className="mt-3 max-w-3xl text-sm leading-6 text-[var(--muted)]">
+                  {analysis.riskAlertMessage || "This case remains available for manual review and panic-button escalation."}
+                </p>
+              </div>
+              <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.78)] px-4 py-3 text-right">
+                <p className="text-[0.68rem] uppercase tracking-[0.18em] text-[var(--muted)]">
+                  Alert Targets
+                </p>
+                <p className="mt-2 text-base font-semibold text-[var(--accent-strong)]">
+                  {analysis.riskAlertTargets.length > 0 ? analysis.riskAlertTargets.join(", ") : "None"}
+                </p>
+              </div>
+            </div>
+          </section>
+
           <div className="grid gap-4 lg:grid-cols-2">
-            <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-700">
+            <section className="surface-panel rounded-[26px] p-5">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
                 Detected Abuse Patterns
               </h3>
               <ul className="grid gap-2 text-sm sm:grid-cols-2">
                 {analysis.abusePatterns.map((pattern) => (
-                  <li key={pattern} className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                  <li key={pattern} className="rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.72)] px-3 py-2 text-[var(--accent-strong)]">
                     {pattern}
                   </li>
                 ))}
               </ul>
             </section>
 
-            <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-700">
+            <section className="surface-panel rounded-[26px] p-5">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
                 Trigger Flags
               </h3>
               <ul className="space-y-2 text-sm">
                 {analysis.triggerFlags.map((flag) => (
-                  <li key={flag} className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                  <li key={flag} className="rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.72)] px-3 py-2 text-[var(--accent-strong)]">
                     {flag}
                   </li>
                 ))}
@@ -107,24 +140,24 @@ export default function ResultPage() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-700">
+            <section className="surface-panel rounded-[26px] p-5">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
                 Assessment Explanation
               </h3>
-              <p className="text-sm leading-6 text-slate-700">{analysis.explanation}</p>
+              <p className="text-sm leading-6 text-[var(--muted)]">{analysis.explanation}</p>
             </section>
 
-            <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-700">
+            <section className="surface-panel rounded-[26px] p-5">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
                 Anonymized Statement Preview
               </h3>
-              <p className="text-sm leading-6 text-slate-700">
+              <p className="text-sm leading-6 text-[var(--muted)]">
                 {analysis.anonymizedStatement || "No statement was provided for this case."}
               </p>
             </section>
           </div>
 
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
             <section className="surface-panel rounded-[26px] p-5">
               <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
                 Analysis Mode
@@ -162,6 +195,48 @@ export default function ResultPage() {
                 </p>
               )}
             </section>
+
+            <section className="surface-panel rounded-[26px] p-5">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
+                Emotion & Stress
+              </h3>
+              <p className="text-2xl font-semibold text-[var(--accent-strong)]">
+                {analysis.stressScore}/100
+              </p>
+              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+                Stress level: {analysis.stressLevel}. Detected signals:{" "}
+                {analysis.emotionSignals.length > 0 ? analysis.emotionSignals.join(", ") : "none"}.
+              </p>
+            </section>
+
+            <section className="surface-panel rounded-[26px] p-5">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
+                Repeat Offender Link
+              </h3>
+              <p className="text-2xl font-semibold text-[var(--accent-strong)]">
+                {analysis.repeatOffenderCount}
+              </p>
+              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+                Pattern-linked prior case IDs:{" "}
+                {analysis.repeatOffenderCaseIds.length > 0
+                  ? analysis.repeatOffenderCaseIds.join(", ")
+                  : "none found yet"}.
+              </p>
+            </section>
+
+            <section className="surface-panel rounded-[26px] p-5">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
+                Fake Case Check
+              </h3>
+              <p className="text-2xl font-semibold text-[var(--accent-strong)]">
+                {analysis.fakeCaseScore}/100
+              </p>
+              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+                {analysis.fakeCaseFlags.length > 0
+                  ? analysis.fakeCaseFlags.join(" | ")
+                  : "No major inconsistency flags were detected in the current intake."}
+              </p>
+            </section>
           </div>
 
           <section>
@@ -173,64 +248,65 @@ export default function ResultPage() {
             </div>
           </section>
 
+          <div className="grid gap-4 xl:grid-cols-3">
+            <section className="surface-panel rounded-[26px] p-5">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
+                Privacy Protection
+              </h3>
+              <div className="space-y-2 text-sm text-[var(--muted)]">
+                <p>
+                  Redaction applied:{" "}
+                  <span className="font-semibold text-[var(--accent-strong)]">
+                    {analysis.privacySummary.redactionApplied ? "Yes" : "No"}
+                  </span>
+                </p>
+                <p>
+                  Encryption at rest:{" "}
+                  <span className="font-semibold text-[var(--accent-strong)]">
+                    {analysis.privacySummary.encryptionAtRest ? "Enabled" : "Not configured"}
+                  </span>
+                </p>
+                <p>
+                  Anonymous ID:{" "}
+                  <span className="font-semibold text-[var(--accent-strong)]">
+                    {analysis.privacySummary.anonymousId}
+                  </span>
+                </p>
+              </div>
+            </section>
+
+            <section className="surface-panel rounded-[26px] p-5">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
+                Location Intelligence
+              </h3>
+              <p className="text-sm leading-6 text-[var(--muted)]">
+                Heatmap label:{" "}
+                <span className="font-semibold text-[var(--accent-strong)]">
+                  {analysis.locationSummary}
+                </span>
+              </p>
+              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+                This case will contribute to area-level hotspot visualization for deployment planning.
+              </p>
+            </section>
+
+            <section className="surface-panel rounded-[26px] p-5">
+              <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
+                Verification Posture
+              </h3>
+              <p className="text-sm leading-6 text-[var(--muted)]">
+                The fake-case model is a consistency aid only. It flags contradictions for lawyer review
+                and does not dismiss survivor testimony automatically.
+              </p>
+            </section>
+          </div>
+
           <div className="grid gap-4 xl:grid-cols-2">
             <TimelineViewer events={analysis.anonymizedTimeline} summary={analysis.timelineSummary} />
             <LegalReferencePanel items={analysis.legalReferenceSuggestions} />
           </div>
 
-          <section className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
-                Safe Action Navigator
-              </h3>
-              <span className="inline-flex rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
-                {analysis.safeActionNavigator.urgency}
-              </span>
-            </div>
-
-            <div className="mt-4 grid gap-4 lg:grid-cols-2">
-              <div>
-                <h4 className="mb-2 text-sm font-semibold text-slate-900">Immediate Flags</h4>
-                <ul className="space-y-2 text-sm text-slate-700">
-                  {analysis.safeActionNavigator.immediateFlags.map((flag) => (
-                    <li key={flag} className="rounded-md border border-slate-200 bg-white px-3 py-2">
-                      {flag}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h4 className="mb-2 text-sm font-semibold text-slate-900">Evidence To Collect</h4>
-                <ul className="space-y-2 text-sm text-slate-700">
-                  {analysis.safeActionNavigator.evidenceToCollect.map((item) => (
-                    <li key={item} className="rounded-md border border-slate-200 bg-white px-3 py-2">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h4 className="mb-2 text-sm font-semibold text-slate-900">Missing Questions</h4>
-                <ul className="space-y-2 text-sm text-slate-700">
-                  {analysis.safeActionNavigator.missingQuestions.map((item) => (
-                    <li key={item} className="rounded-md border border-slate-200 bg-white px-3 py-2">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h4 className="mb-2 text-sm font-semibold text-slate-900">Referral Suggestions</h4>
-                <ul className="space-y-2 text-sm text-slate-700">
-                  {analysis.safeActionNavigator.referralSuggestions.map((item) => (
-                    <li key={item} className="rounded-md border border-slate-200 bg-white px-3 py-2">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </section>
+          <SafeActionNavigator data={analysis.safeActionNavigator} />
 
           <div className="flex justify-end">
             <Link

@@ -8,27 +8,40 @@ import {
   type ReactNode
 } from "react";
 
-import { mockAnalysisResult, mockIntakeData } from "@/lib/mock-data";
-import type { AnalysisResult, CaseRecord, IntakeFormData, TimelineEvent } from "@/lib/types";
+import { demoAnalysisResult, demoIntakeData, emptyIntakeData } from "@/lib/mock-data";
+import type {
+  AnalysisResult,
+  CaseDocument,
+  CaseRecord,
+  DraftFrequency,
+  DraftSeverity,
+  IntakeFormState,
+  TimelineEvent
+} from "@/lib/types";
 
 interface CaseStoreValue {
   isHydrated: boolean;
-  formData: IntakeFormData;
+  formData: IntakeFormState;
   caseId: string | null;
   analysis: AnalysisResult | null;
-  setFormData: (nextValue: IntakeFormData) => void;
-  updateFormData: (nextValue: Partial<IntakeFormData>) => void;
+  documents: CaseDocument[];
+  setFormData: (nextValue: IntakeFormState) => void;
+  updateFormData: (nextValue: Partial<IntakeFormState>) => void;
   setCaseId: (nextValue: string | null) => void;
   setAnalysis: (nextValue: AnalysisResult | null) => void;
+  setDocuments: (nextValue: CaseDocument[]) => void;
+  addDocument: (nextValue: CaseDocument) => void;
+  appendImportedStatement: (nextValue: string) => void;
   loadCase: (record: CaseRecord) => void;
   loadDemoCase: () => void;
   resetCase: () => void;
 }
 
 interface PersistedCaseState {
-  formData: IntakeFormData;
+  formData: IntakeFormState;
   caseId: string | null;
   analysis: AnalysisResult | null;
+  documents: CaseDocument[];
 }
 
 const STORAGE_KEY = "dv-case-analyzer-state";
@@ -49,24 +62,67 @@ function isValidTimelineEvent(value: unknown): value is TimelineEvent {
   );
 }
 
-function normalizeFormData(value: unknown): IntakeFormData {
+function isValidCaseDocument(value: unknown): value is CaseDocument {
   if (!value || typeof value !== "object") {
-    return mockIntakeData;
+    return false;
   }
 
-  const candidate = value as Partial<IntakeFormData>;
+  const candidate = value as Record<string, unknown>;
+  return (
+    typeof candidate.id === "string" &&
+    typeof candidate.fileName === "string" &&
+    typeof candidate.contentType === "string" &&
+    typeof candidate.pageCount === "number" &&
+    typeof candidate.usedOcr === "boolean" &&
+    typeof candidate.textLength === "number" &&
+    typeof candidate.preview === "string" &&
+    typeof candidate.uploadedAt === "string"
+  );
+}
+
+function isValidDraftFrequency(value: unknown): value is DraftFrequency {
+  return value === "" || value === "rare" || value === "occasional" || value === "frequent";
+}
+
+function isValidDraftSeverity(value: unknown): value is DraftSeverity {
+  return value === "" || value === "low" || value === "medium" || value === "high";
+}
+
+function normalizeFormData(value: unknown): IntakeFormState {
+  if (!value || typeof value !== "object") {
+    return emptyIntakeData;
+  }
+
+  const candidate = value as Partial<IntakeFormState>;
 
   return {
-    ...mockIntakeData,
+    ...emptyIntakeData,
     ...candidate,
-    age: typeof candidate.age === "number" ? candidate.age : mockIntakeData.age,
+    age: typeof candidate.age === "number" ? candidate.age : emptyIntakeData.age,
+    frequency: isValidDraftFrequency(candidate.frequency)
+      ? candidate.frequency
+      : emptyIntakeData.frequency,
+    threatLevel: isValidDraftSeverity(candidate.threatLevel)
+      ? candidate.threatLevel
+      : emptyIntakeData.threatLevel,
     priorComplaintsCount:
       typeof candidate.priorComplaintsCount === "number"
         ? candidate.priorComplaintsCount
-        : mockIntakeData.priorComplaintsCount,
+        : emptyIntakeData.priorComplaintsCount,
+    locationLabel:
+      typeof candidate.locationLabel === "string"
+        ? candidate.locationLabel
+        : emptyIntakeData.locationLabel,
+    locationLat:
+      typeof candidate.locationLat === "number" ? candidate.locationLat : emptyIntakeData.locationLat,
+    locationLng:
+      typeof candidate.locationLng === "number" ? candidate.locationLng : emptyIntakeData.locationLng,
+    emergencyContacts: Array.isArray(candidate.emergencyContacts)
+      ? candidate.emergencyContacts.filter((item): item is string => typeof item === "string")
+      : emptyIntakeData.emergencyContacts,
     timelineEvents: Array.isArray(candidate.timelineEvents)
       ? candidate.timelineEvents.filter(isValidTimelineEvent)
-      : mockIntakeData.timelineEvents
+      : emptyIntakeData.timelineEvents
   };
 }
 
@@ -98,9 +154,10 @@ function isValidAnalysis(value: unknown): value is AnalysisResult {
 }
 
 export function CaseProvider({ children }: { children: ReactNode }) {
-  const [formData, setFormData] = useState<IntakeFormData>(mockIntakeData);
+  const [formData, setFormData] = useState<IntakeFormState>(emptyIntakeData);
   const [caseId, setCaseId] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
+  const [documents, setDocuments] = useState<CaseDocument[]>([]);
   const [isHydrated, setIsHydrated] = useState(false);
 
   useEffect(() => {
@@ -115,6 +172,11 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       setFormData(normalizeFormData(parsedState.formData));
       setCaseId(parsedState.caseId);
       setAnalysis(isValidAnalysis(parsedState.analysis) ? parsedState.analysis : null);
+      setDocuments(
+        Array.isArray(parsedState.documents)
+          ? parsedState.documents.filter(isValidCaseDocument)
+          : []
+      );
     } catch {
       window.localStorage.removeItem(STORAGE_KEY);
     } finally {
@@ -130,17 +192,19 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     const nextState: PersistedCaseState = {
       formData,
       caseId,
-      analysis
+      analysis,
+      documents
     };
 
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
-  }, [analysis, caseId, formData, isHydrated]);
+  }, [analysis, caseId, documents, formData, isHydrated]);
 
   const value: CaseStoreValue = {
     isHydrated,
     formData,
     caseId,
     analysis,
+    documents,
     setFormData,
     updateFormData: (nextValue) => {
       setFormData((currentValue) => ({
@@ -150,6 +214,23 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     },
     setCaseId,
     setAnalysis,
+    setDocuments,
+    addDocument: (nextValue) => {
+      setDocuments((currentValue) => [nextValue, ...currentValue.filter((item) => item.id !== nextValue.id)]);
+    },
+    appendImportedStatement: (nextValue) => {
+      const normalizedValue = nextValue.trim();
+      if (!normalizedValue) {
+        return;
+      }
+
+      setFormData((currentValue) => ({
+        ...currentValue,
+        statement: currentValue.statement.trim()
+          ? `${currentValue.statement.trim()}\n\n${normalizedValue}`
+          : normalizedValue
+      }));
+    },
     loadCase: (record) => {
       setFormData({
         victimName: record.victimName,
@@ -161,20 +242,27 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         statement: record.statement,
         historySummary: record.historySummary,
         priorComplaintsCount: record.priorComplaintsCount,
-        timelineEvents: record.timelineEvents
+        timelineEvents: record.timelineEvents,
+        locationLabel: record.locationLabel,
+        locationLat: record.locationLat,
+        locationLng: record.locationLng,
+        emergencyContacts: record.emergencyContacts
       });
       setCaseId(record.id);
       setAnalysis(record.analysis);
+      setDocuments(record.documents);
     },
     loadDemoCase: () => {
-      setFormData(mockIntakeData);
+      setFormData(demoIntakeData);
       setCaseId("DEMO-CASE-001");
-      setAnalysis(mockAnalysisResult);
+      setAnalysis(demoAnalysisResult);
+      setDocuments([]);
     },
     resetCase: () => {
-      setFormData(mockIntakeData);
+      setFormData(emptyIntakeData);
       setCaseId(null);
       setAnalysis(null);
+      setDocuments([]);
       window.localStorage.removeItem(STORAGE_KEY);
     }
   };

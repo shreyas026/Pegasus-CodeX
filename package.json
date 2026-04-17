@@ -3,12 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node --max-old-space-size=4096 ./node_modules/next/dist/bin/next dev",
+    "build": "node --max-old-space-size=4096 ./node_modules/next/dist/bin/next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.103.3",
+    "lucide-react": "^1.8.0",
     "next": "15.2.3",
     "react": "19.0.0",
     "react-dom": "19.0.0"

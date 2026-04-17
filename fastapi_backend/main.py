@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from routes.alert_routes import router as alert_router
 from routes.case_routes import router as case_router
+from routes.support_routes import router as support_router
+from storage import init_storage
 
 
 app = FastAPI(
@@ -12,16 +15,21 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:3001",
-    ],
+    allow_origins=[],
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(case_router)
+app.include_router(alert_router)
+app.include_router(support_router)
+
+
+@app.on_event("startup")
+def startup() -> None:
+    init_storage()
 
 
 @app.get("/health")

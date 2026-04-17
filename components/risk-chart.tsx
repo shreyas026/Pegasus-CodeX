@@ -6,11 +6,14 @@ export function RiskChart({ points }: { points: ChartPoint[] }) {
       {points.map((point) => (
         <div key={point.label}>
           <div className="mb-1 flex items-center justify-between text-sm">
-            <span className="text-slate-700">{point.label}</span>
-            <span className="font-medium text-slate-800">{point.value}</span>
+            <span className="text-[var(--muted)]">{point.label}</span>
+            <span className="font-medium text-[var(--accent-strong)]">{point.value}</span>
           </div>
-          <div className="h-2 rounded-full bg-slate-200">
-            <div className="h-2 rounded-full bg-slate-700" style={{ width: `${point.value}%` }} />
+          <div className="h-2 rounded-full bg-[rgba(15,50,37,0.1)]">
+            <div
+              className="h-2 rounded-full bg-[linear-gradient(90deg,var(--low),var(--accent),var(--high))]"
+              style={{ width: `${point.value}%` }}
+            />
           </div>
         </div>
       ))}

@@ -1,6 +1,23 @@
-import type { AnalysisResult, IntakeFormData } from "@/lib/types";
+import type { AnalysisResult, IntakeFormState } from "@/lib/types";
 
-export const mockIntakeData: IntakeFormData = {
+export const emptyIntakeData: IntakeFormState = {
+  victimName: "",
+  age: 0,
+  abuseType: "",
+  incidentDescription: "",
+  frequency: "",
+  threatLevel: "",
+  statement: "",
+  historySummary: "",
+  priorComplaintsCount: 0,
+  timelineEvents: [],
+  locationLabel: "",
+  locationLat: null,
+  locationLng: null,
+  emergencyContacts: []
+};
+
+export const demoIntakeData: IntakeFormState = {
   victimName: "Aarohi Sharma",
   age: 31,
   abuseType: "Psychological and verbal abuse",
@@ -25,10 +42,14 @@ export const mockIntakeData: IntakeFormData = {
       details: "The respondent shouted, threatened, and restricted access to money during an argument.",
       source: "Victim statement"
     }
-  ]
+  ],
+  locationLabel: "Bengaluru East",
+  locationLat: 12.9716,
+  locationLng: 77.5946,
+  emergencyContacts: ["NGO Hotline", "Sister: +91-9000000001"]
 };
 
-export const mockAnalysisResult: AnalysisResult = {
+export const demoAnalysisResult: AnalysisResult = {
   analysisMode: "hybrid-ml",
   severity: "high",
   riskScore: 78,
@@ -42,6 +63,23 @@ export const mockAnalysisResult: AnalysisResult = {
   ],
   explanation:
     "High severity due to frequent emotional abuse, financial abuse, verbal abuse, medium threat level, and high escalation indicators including Coercive control, Escalating incidents, Multiple abuse patterns detected",
+  emotionSignals: ["fear", "anxiety"],
+  stressScore: 72,
+  stressLevel: "high",
+  fakeCaseFlags: [],
+  fakeCaseScore: 0,
+  repeatOffenderSignature: "a1b2c3d4e5f6",
+  repeatOffenderCount: 1,
+  repeatOffenderCaseIds: ["CASE-0008"],
+  riskAlertLevel: "high",
+  riskAlertMessage: "High-risk indicators detected. Activate NGO response workflow and emergency coordination.",
+  riskAlertTargets: ["NGO", "Police", "Emergency Contact"],
+  privacySummary: {
+    redactionApplied: true,
+    encryptionAtRest: false,
+    anonymousId: "ANON-123ABC"
+  },
+  locationSummary: "Bengaluru East",
   anonymizedStatement:
     "The respondent repeatedly isolated [REDACTED_NAME] from family and threatened financial control if help was sought.",
   anonymizedTimeline: [

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems: { href: Route; label: string }[] = [
+  { href: "/", label: "Overview" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/intake", label: "Case Intake Form" },
   { href: "/statement", label: "Statement Analysis" },
@@ -16,12 +17,12 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="surface-panel sticky top-5 w-full overflow-hidden rounded-[28px] text-[var(--accent-strong)] lg:w-[320px] lg:min-h-[calc(100vh-2.5rem)]">
-      <div className="bg-[radial-gradient(circle_at_top_left,_rgba(199,169,118,0.24),_transparent_38%),linear-gradient(180deg,rgba(255,252,247,0.95),rgba(243,235,221,0.82))] p-5">
+    <aside className="surface-panel sticky top-3 w-full overflow-hidden rounded-[30px] text-[var(--accent-strong)] lg:w-[320px] lg:min-h-[calc(100vh-1.5rem)]">
+      <div className="bg-[radial-gradient(circle_at_top_left,_rgba(199,169,118,0.22),_transparent_38%),linear-gradient(180deg,rgba(255,252,247,0.86),rgba(243,235,221,0.66))] p-5">
         <div className="flex items-center justify-between">
-          <span className="status-pill">Legal-Tech</span>
+          <span className="status-pill">Safety AI</span>
           <span className="text-[0.7rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-            Case Review
+            Full Suite
           </span>
         </div>
         <div className="mt-8">
@@ -38,21 +39,21 @@ export function Sidebar() {
       <div className="editorial-rule mx-5" />
       <nav className="space-y-2 px-4 py-5">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = item.href === "/" ? pathname === item.href : pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
               className={`group flex items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
                 isActive
-                  ? "border-[var(--accent-soft)] bg-[rgba(123,91,45,0.08)] text-[var(--accent-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
-                  : "border-transparent text-[var(--muted)] hover:border-[rgba(123,91,45,0.14)] hover:bg-[rgba(255,252,247,0.75)] hover:text-[var(--accent-strong)]"
+                  ? "border-[rgba(123,91,45,0.16)] bg-[rgba(123,91,45,0.08)] text-[var(--accent-strong)] shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+                  : "border-transparent text-[var(--muted)] hover:border-[rgba(123,91,45,0.14)] hover:bg-[rgba(255,255,255,0.3)] hover:text-[var(--accent-strong)]"
               }`}
             >
               <span className="font-medium">{item.label}</span>
               <span
                 className={`text-[0.68rem] uppercase tracking-[0.18em] ${
-                  isActive ? "text-[var(--accent)]" : "text-[rgba(93,85,76,0.7)] group-hover:text-[var(--accent)]"
+                  isActive ? "text-[var(--accent)]" : "text-[rgba(69,101,87,0.75)] group-hover:text-[var(--accent)]"
                 }`}
               >
                 Open
@@ -61,12 +62,12 @@ export function Sidebar() {
           );
         })}
       </nav>
-      <div className="mx-4 mb-4 rounded-[22px] border border-[rgba(123,91,45,0.16)] bg-[rgba(255,252,247,0.72)] p-4">
+      <div className="mx-4 mb-4 rounded-[22px] border border-[var(--border)] bg-[rgba(255,255,255,0.22)] p-4 backdrop-blur-[24px]">
         <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-          System Posture
+          Feature Coverage
         </p>
         <p className="mt-2 text-sm leading-6 text-[var(--accent-strong)]">
-          Explainable scoring, redacted narratives, chronology-aware review, and structured NGO support outputs.
+          Explainable scoring, voice intake, real-time alerts, support chat, heatmaps, repeat-offender linking, privacy controls, and brief generation.
         </p>
       </div>
     </aside>

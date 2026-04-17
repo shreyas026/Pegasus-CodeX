@@ -8,7 +8,7 @@ interface CardProps {
 
 export function Card({ title, subtitle, children }: CardProps) {
   return (
-    <section className="surface-panel overflow-hidden rounded-[28px] p-0">
+    <section className="surface-panel overflow-hidden rounded-[30px] p-0">
       <div className="h-1.5 bg-gradient-to-r from-transparent via-[var(--accent-soft)] to-transparent" />
       <header className="px-6 pb-0 pt-6">
         <p className="display-kicker text-[0.68rem] font-semibold uppercase tracking-[0.24em]">

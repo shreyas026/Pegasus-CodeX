@@ -4,8 +4,11 @@ node_modules/
 __pycache__/
 *.py[cod]
 *.log
+*.sqlite3
+fastapi_backend/data/
 
 # Local app/runtime artifacts
 frontend*.log
 backend*.log
 *.err.log
+*.tsbuildinfo

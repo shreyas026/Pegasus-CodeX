@@ -13,19 +13,45 @@ import { createCase } from "@/lib/api";
 
 export default function IntakePage() {
   const router = useRouter();
-  const { formData, updateFormData, setCaseId, setAnalysis } = useCaseStore();
+  const { formData, updateFormData, setCaseId, setAnalysis, setDocuments } = useCaseStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const emergencyContactsValue = formData.emergencyContacts.join("\n");
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
+    if (
+      !formData.victimName.trim() ||
+      formData.age <= 0 ||
+      !formData.abuseType.trim() ||
+      !formData.frequency ||
+      !formData.threatLevel ||
+      !formData.incidentDescription.trim()
+    ) {
+      setError(
+        "Complete victim name, age, abuse type, frequency, threat level, and incident description before saving the intake."
+      );
+      return;
+    }
+
+    if (
+      formData.timelineEvents.some(
+        (event) => !event.date.trim() || !event.title.trim() || !event.details.trim()
+      )
+    ) {
+      setError("Complete or remove unfinished timeline events before saving the intake.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const response = await createCase(formData);
       setCaseId(response.caseId);
       setAnalysis(null);
+      setDocuments(response.data.documents);
       router.push("/statement");
     } catch (submitError) {
       setError(
@@ -54,9 +80,10 @@ export default function IntakePage() {
             </div>
             <div className="editorial-rule" />
             <div className="space-y-2 text-[var(--muted)]">
-              <p>Threat level: <span className="font-semibold text-[var(--accent-strong)]">{formData.threatLevel}</span></p>
+              <p>Threat level: <span className="font-semibold text-[var(--accent-strong)]">{formData.threatLevel || "Not set"}</span></p>
               <p>Prior complaints: <span className="font-semibold text-[var(--accent-strong)]">{formData.priorComplaintsCount}</span></p>
-              <p>Frequency: <span className="font-semibold text-[var(--accent-strong)]">{formData.frequency}</span></p>
+              <p>Frequency: <span className="font-semibold text-[var(--accent-strong)]">{formData.frequency || "Not set"}</span></p>
+              <p>Area: <span className="font-semibold text-[var(--accent-strong)]">{formData.locationLabel || "Not mapped"}</span></p>
             </div>
           </div>
         }
@@ -64,6 +91,54 @@ export default function IntakePage() {
 
       <Card title="Case Intake Form" subtitle="Capture baseline details for risk triage">
         <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
+          <div className="md:col-span-2 grid gap-3 xl:grid-cols-[1.4fr_1fr]">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-[24px] border border-[rgba(123,91,45,0.14)] bg-[rgba(255,255,255,0.56)] p-4">
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                  Incident Detail
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-[var(--accent-strong)]">
+                  {formData.incidentDescription.trim().length}
+                </p>
+                <p className="mt-2 text-sm text-[var(--muted)]">Characters in the primary incident narrative.</p>
+              </div>
+              <div className="rounded-[24px] border border-[rgba(123,91,45,0.14)] bg-[rgba(255,255,255,0.56)] p-4">
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                  History Depth
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-[var(--accent-strong)]">
+                  {formData.historySummary.trim().length}
+                </p>
+                <p className="mt-2 text-sm text-[var(--muted)]">Characters of history and complaint context.</p>
+              </div>
+              <div className="rounded-[24px] border border-[rgba(123,91,45,0.14)] bg-[rgba(255,255,255,0.56)] p-4">
+                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                  Timeline Health
+                </p>
+                <p className="mt-2 text-2xl font-semibold text-[var(--accent-strong)]">
+                  {formData.timelineEvents.filter((event) => event.date && event.title && event.details).length}/
+                  {formData.timelineEvents.length}
+                </p>
+                <p className="mt-2 text-sm text-[var(--muted)]">Timeline entries with full date, title, and detail.</p>
+              </div>
+            </div>
+
+            <div className="rounded-[24px] border border-[rgba(123,91,45,0.14)] bg-[linear-gradient(135deg,rgba(255,252,247,0.95),rgba(242,231,211,0.84))] p-5">
+              <p className="display-kicker text-[0.68rem] font-semibold uppercase tracking-[0.24em]">
+                Next Step
+              </p>
+              <h3 className="mt-3 text-xl font-semibold text-[var(--accent-strong)]">
+                Save intake, then import the survivor statement as a PDF, image, or voice note
+              </h3>
+              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+                The statement page now acts like an evidence intake step. Once this case is saved,
+                you can upload a scanned complaint, photo, or PDF, or dictate the narrative by voice,
+                and then run the same analysis on the extracted text. Area tags and emergency contacts
+                from this screen also power the panic button, heatmap, and live alert routing.
+              </p>
+            </div>
+          </div>
+
           <div>
             <label htmlFor="victim-name">Victim name</label>
             <input
@@ -78,10 +153,11 @@ export default function IntakePage() {
             <input
               id="age"
               type="number"
-              value={formData.age}
+              value={formData.age === 0 ? "" : formData.age}
               min={1}
               max={120}
               onChange={(event) => updateFormData({ age: Number(event.target.value) || 0 })}
+              placeholder="Enter age"
             />
           </div>
 
@@ -92,6 +168,7 @@ export default function IntakePage() {
               value={formData.abuseType}
               onChange={(event) => updateFormData({ abuseType: event.target.value })}
             >
+              <option value="">Select abuse type</option>
               <option>Physical abuse</option>
               <option>Psychological and verbal abuse</option>
               <option>Financial abuse</option>
@@ -111,6 +188,7 @@ export default function IntakePage() {
                 })
               }
             >
+              <option value="">Select frequency</option>
               <option value="rare">Rare</option>
               <option value="occasional">Occasional</option>
               <option value="frequent">Frequent</option>
@@ -128,6 +206,7 @@ export default function IntakePage() {
                 })
               }
             >
+              <option value="">Select threat level</option>
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
@@ -150,10 +229,11 @@ export default function IntakePage() {
               id="prior-complaints"
               type="number"
               min={0}
-              value={formData.priorComplaintsCount}
+              value={formData.priorComplaintsCount === 0 ? "" : formData.priorComplaintsCount}
               onChange={(event) =>
                 updateFormData({ priorComplaintsCount: Number(event.target.value) || 0 })
               }
+              placeholder="0"
             />
           </div>
 
@@ -165,6 +245,66 @@ export default function IntakePage() {
               value={formData.historySummary}
               onChange={(event) => updateFormData({ historySummary: event.target.value })}
               placeholder="Summarize prior complaints, police contact, family intervention, or case history..."
+            />
+          </div>
+
+          <div>
+            <label htmlFor="location-label">Location / area label</label>
+            <input
+              id="location-label"
+              value={formData.locationLabel}
+              onChange={(event) => updateFormData({ locationLabel: event.target.value })}
+              placeholder="Example: Bengaluru East"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="location-lat">Latitude</label>
+            <input
+              id="location-lat"
+              type="number"
+              step="any"
+              value={formData.locationLat ?? ""}
+              onChange={(event) =>
+                updateFormData({
+                  locationLat: event.target.value === "" ? null : Number(event.target.value)
+                })
+              }
+              placeholder="12.9716"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="location-lng">Longitude</label>
+            <input
+              id="location-lng"
+              type="number"
+              step="any"
+              value={formData.locationLng ?? ""}
+              onChange={(event) =>
+                updateFormData({
+                  locationLng: event.target.value === "" ? null : Number(event.target.value)
+                })
+              }
+              placeholder="77.5946"
+            />
+          </div>
+
+          <div className="md:col-span-2">
+            <label htmlFor="emergency-contacts">Emergency contacts</label>
+            <textarea
+              id="emergency-contacts"
+              rows={4}
+              value={emergencyContactsValue}
+              onChange={(event) =>
+                updateFormData({
+                  emergencyContacts: event.target.value
+                    .split(/\r?\n/)
+                    .map((contact) => contact.trim())
+                    .filter(Boolean)
+                })
+              }
+              placeholder={"One contact per line.\nExample: NGO hotline\nPolice control room\nTrusted sibling"}
             />
           </div>
 

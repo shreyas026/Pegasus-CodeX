@@ -100,7 +100,7 @@ export default function BriefPage() {
 
       <Card title="Generated Brief" subtitle="Structured legal summary for case preparation">
         <div className="space-y-4 print-brief">
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm">
+          <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.62)] p-4 text-sm">
             <p>
               <span className="font-semibold">Prepared by:</span> Domestic Violence Case Analyzer
             </p>
@@ -121,17 +121,17 @@ export default function BriefPage() {
           </div>
 
           <section className="grid gap-4 md:grid-cols-3">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm">
-              <p className="text-slate-600">Severity</p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">{analysis.severity}</p>
+            <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.62)] p-4 text-sm">
+              <p className="text-[var(--muted)]">Severity</p>
+              <p className="mt-2 text-xl font-semibold text-[var(--accent-strong)]">{analysis.severity}</p>
             </div>
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm">
-              <p className="text-slate-600">Escalation</p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">{analysis.escalationLevel}</p>
+            <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.62)] p-4 text-sm">
+              <p className="text-[var(--muted)]">Escalation</p>
+              <p className="mt-2 text-xl font-semibold text-[var(--accent-strong)]">{analysis.escalationLevel}</p>
             </div>
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm">
-              <p className="text-slate-600">Urgency</p>
-              <p className="mt-2 text-xl font-semibold text-slate-900">
+            <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.62)] p-4 text-sm">
+              <p className="text-[var(--muted)]">Urgency</p>
+              <p className="mt-2 text-xl font-semibold text-[var(--accent-strong)]">
                 {analysis.safeActionNavigator.urgency}
               </p>
             </div>
@@ -143,26 +143,26 @@ export default function BriefPage() {
           </div>
 
           <section className="grid gap-4 xl:grid-cols-2">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+            <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.62)] p-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
                 Evidence Checklist
               </h3>
-              <ul className="mt-4 space-y-2 text-sm text-slate-700">
+              <ul className="mt-4 space-y-2 text-sm text-[var(--muted)]">
                 {analysis.safeActionNavigator.evidenceToCollect.map((item) => (
-                  <li key={item} className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                  <li key={item} className="rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.78)] px-3 py-2">
                     {item}
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+            <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.62)] p-4">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--muted)]">
                 Missing Information To Clarify
               </h3>
-              <ul className="mt-4 space-y-2 text-sm text-slate-700">
+              <ul className="mt-4 space-y-2 text-sm text-[var(--muted)]">
                 {analysis.safeActionNavigator.missingQuestions.map((item) => (
-                  <li key={item} className="rounded-md border border-slate-200 bg-white px-3 py-2">
+                  <li key={item} className="rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.78)] px-3 py-2">
                     {item}
                   </li>
                 ))}
@@ -170,8 +170,35 @@ export default function BriefPage() {
             </div>
           </section>
 
-          <section className="rounded-lg border border-slate-200 p-4">
-            <pre className="whitespace-pre-wrap text-sm leading-7 text-slate-700">
+          <section className="grid gap-4 xl:grid-cols-3">
+            <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.62)] p-4 text-sm">
+              <p className="text-[var(--muted)]">Risk Alert</p>
+              <p className="mt-2 font-semibold text-[var(--accent-strong)]">
+                {analysis.riskAlertLevel === "none" ? "Not triggered" : analysis.riskAlertMessage}
+              </p>
+            </div>
+            <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.62)] p-4 text-sm">
+              <p className="text-[var(--muted)]">Repeat-Offender Link</p>
+              <p className="mt-2 font-semibold text-[var(--accent-strong)]">
+                {analysis.repeatOffenderCount > 0
+                  ? analysis.repeatOffenderCaseIds.join(", ")
+                  : "No linked anonymized cases found"}
+              </p>
+            </div>
+            <div className="rounded-[24px] border border-[var(--border)] bg-[rgba(255,255,255,0.62)] p-4 text-sm">
+              <p className="text-[var(--muted)]">Privacy Posture</p>
+              <p className="mt-2 font-semibold text-[var(--accent-strong)]">
+                Anonymous ID {analysis.privacySummary.anonymousId}
+              </p>
+              <p className="mt-2 text-[var(--muted)]">
+                Redaction {analysis.privacySummary.redactionApplied ? "enabled" : "disabled"}, encryption{" "}
+                {analysis.privacySummary.encryptionAtRest ? "enabled" : "not configured"}.
+              </p>
+            </div>
+          </section>
+
+          <section className="rounded-[24px] border border-[var(--border)] p-4">
+            <pre className="whitespace-pre-wrap text-sm leading-7 text-[var(--muted)]">
               {analysis.generatedBrief}
             </pre>
           </section>

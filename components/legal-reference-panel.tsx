@@ -17,7 +17,7 @@ export function LegalReferencePanel({ items }: LegalReferencePanelProps) {
 
       <div className="space-y-3">
         {items.map((item) => (
-          <div key={`${item.title}-${item.source}`} className="rounded-2xl border border-[rgba(123,91,45,0.14)] bg-[rgba(255,255,255,0.78)] p-4">
+          <div key={`${item.title}-${item.source}`} className="rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.78)] p-4">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm font-semibold text-[var(--accent-strong)]">{item.title}</p>
               <span className="text-xs uppercase tracking-wide text-[var(--muted)]">{item.source}</span>

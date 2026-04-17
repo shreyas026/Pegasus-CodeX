@@ -3,12 +3,12 @@
 :root {
   --bg: #ede9df;
   --bg-deep: #d8cfbf;
-  --panel: rgba(255, 252, 245, 0.88);
+  --panel: linear-gradient(135deg, rgba(255, 255, 255, 0.38), rgba(247, 243, 235, 0.66));
   --panel-strong: #fffdf8;
   --panel-subtle: rgba(247, 243, 235, 0.72);
-  --border: rgba(74, 60, 41, 0.15);
-  --border-strong: rgba(74, 60, 41, 0.28);
-  --text: #161616;
+  --border: rgba(74, 60, 41, 0.14);
+  --border-strong: rgba(74, 60, 41, 0.24);
+  --text: #0d1814;
   --muted: #5d554c;
   --accent: #7b5b2d;
   --accent-strong: #302117;
@@ -24,31 +24,101 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 1.25rem;
 }
 
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(123, 91, 45, 0.18), transparent 34%),
-    radial-gradient(circle at top right, rgba(48, 33, 23, 0.12), transparent 26%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.65), transparent 40%),
-    linear-gradient(180deg, #f6f1e7 0%, var(--bg) 54%, var(--bg-deep) 100%);
+    radial-gradient(circle at top, rgba(199, 169, 118, 0.2), transparent 32%),
+    linear-gradient(180deg, #f8eee2 0%, var(--bg) 38%, var(--bg-deep) 100%);
   color: var(--text);
   font-family: "Aptos", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
   position: relative;
+  overflow-x: hidden;
 }
 
-body::before {
-  content: "";
+.background-shell {
   position: fixed;
   inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.app-shell {
+  position: relative;
+  z-index: 1;
+}
+
+/* Moving Mesh Background */
+.video-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #fcefe2 0%, var(--bg) 54%, var(--bg-deep) 100%);
+}
+
+.video-bg::before, .video-bg::after, .video-bg-layer {
+  content: "";
+  position: absolute;
+  width: 150vw;
+  height: 150vh;
+  top: -25vh;
+  left: -25vw;
+  opacity: 0.82;
+  filter: blur(72px);
+  animation-duration: 25s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-direction: alternate;
+}
+
+.video-bg::before {
+  background: radial-gradient(circle, rgba(123, 91, 45, 0.48) 0%, transparent 60%);
+  animation-name: sway1;
+}
+
+.video-bg::after {
+  background: radial-gradient(circle, rgba(138, 47, 47, 0.28) 0%, transparent 50%);
+  animation-name: sway2;
+  animation-delay: -5s;
+  animation-direction: alternate-reverse;
+}
+
+.video-bg-layer {
+  background: radial-gradient(circle, rgba(230, 210, 180, 0.62) 0%, transparent 70%);
+  animation-name: sway3;
+  animation-delay: -12s;
+}
+
+@keyframes sway1 {
+  0% { transform: translate(10%, 10%) scale(1); }
+  50% { transform: translate(-10%, 20%) scale(1.1); }
+  100% { transform: translate(-20%, -10%) scale(0.9); }
+}
+
+@keyframes sway2 {
+  0% { transform: translate(-15%, -15%) scale(1.2); }
+  50% { transform: translate(15%, 5%) scale(0.9); }
+  100% { transform: translate(5%, 25%) scale(1.1); }
+}
+
+@keyframes sway3 {
+  0% { transform: translate(20%, -20%) scale(0.8); }
+  50% { transform: translate(-5%, -5%) scale(1.2); }
+  100% { transform: translate(-15%, 15%) scale(1); }
+}
+
+.grid-overlay {
+  position: absolute;
+  inset: 0;
   background-image:
-    linear-gradient(rgba(74, 60, 41, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(74, 60, 41, 0.045) 1px, transparent 1px);
+    linear-gradient(rgba(74, 60, 41, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(74, 60, 41, 0.07) 1px, transparent 1px);
   background-size: 28px 28px;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent 90%);
-  pointer-events: none;
-  z-index: -1;
+  opacity: 0.7;
 }
 
 h1,
@@ -77,8 +147,11 @@ select,
 textarea {
   @apply w-full rounded-xl border px-4 py-3 text-sm outline-none transition duration-200;
   border-color: var(--border-strong);
-  background-color: rgba(255, 252, 246, 0.9);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  background-color: rgba(255, 255, 255, 0.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.64),
+    0 14px 30px rgba(48, 33, 23, 0.04);
+  backdrop-filter: blur(22px);
 }
 
 input:focus,
@@ -87,7 +160,7 @@ textarea:focus {
   @apply ring-2;
   border-color: var(--accent);
   --tw-ring-color: rgb(123 91 45 / 0.18);
-  background-color: #fffdf8;
+  background-color: rgba(255, 255, 255, 0.42);
 }
 
 label {
@@ -113,23 +186,24 @@ button:hover {
 
 .editorial-rule {
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(123, 91, 45, 0.4) 20%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(123, 91, 45, 0.36) 20%, transparent 100%);
 }
 
 .surface-panel {
   background: var(--panel);
   border: 1px solid var(--border);
   box-shadow:
-    0 18px 45px rgba(26, 20, 15, 0.08),
+    0 22px 50px rgba(48, 33, 23, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(30px) saturate(1.18);
 }
 
 .status-pill {
   @apply inline-flex items-center rounded-full px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.18em];
-  background: rgba(255, 249, 239, 0.78);
+  background: rgba(255, 255, 255, 0.3);
   color: var(--accent-strong);
-  border: 1px solid rgba(123, 91, 45, 0.2);
+  border: 1px solid rgba(123, 91, 45, 0.18);
+  backdrop-filter: blur(20px);
 }
 
 @keyframes pageFade {
@@ -151,6 +225,10 @@ button:hover {
   }
 
   body::before {
+    display: none;
+  }
+
+  .background-shell {
     display: none;
   }
 
