@@ -13,10 +13,6 @@ export function PanicButton() {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
 
-  const missingLocation = !formData.locationLabel.trim();
-  const missingContacts = formData.emergencyContacts.length === 0;
-  const needsPrerequisites = Boolean(caseId) && (missingLocation || missingContacts);
-
   async function handleTrigger() {
     if (!caseId) {
       router.push("/intake");
@@ -96,28 +92,6 @@ export function PanicButton() {
           </button>
         </div>
       )}
-
-      {needsPrerequisites ? (
-        <div className="pointer-events-auto w-full rounded-[22px] border border-[rgba(255,255,255,0.48)] bg-[linear-gradient(135deg,rgba(255,255,255,0.7),rgba(247,243,235,0.3))] p-4 text-left shadow-[0_18px_32px_rgba(48,33,23,0.16)] backdrop-blur-[28px]">
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-[var(--accent)]">
-            SOS Readiness
-          </p>
-          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-            Add the missing details so SOS alerts include the survivor&apos;s area and trusted contacts.
-          </p>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-[var(--muted)]">
-            {missingLocation ? <li>Location label is missing.</li> : null}
-            {missingContacts ? <li>No emergency contacts listed.</li> : null}
-          </ul>
-          <button
-            type="button"
-            onClick={() => router.push("/intake")}
-            className="mt-3 inline-flex items-center gap-2 rounded-full border border-[rgba(123,91,45,0.18)] bg-[rgba(255,255,255,0.72)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--accent-strong)] transition hover:bg-white"
-          >
-            Update Intake
-          </button>
-        </div>
-      ) : null}
     </div>
   );
 }
